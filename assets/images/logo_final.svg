@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="300"
+   height="300"
+   viewBox="0 0 300 300"
+   version="1.1"
+   id="svg1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient28">
+      <stop
+         style="stop-color:#1d1d1d;stop-opacity:1;"
+         offset="0"
+         id="stop28" />
+      <stop
+         style="stop-color:#292929;stop-opacity:1;"
+         offset="0.5"
+         id="stop30" />
+      <stop
+         style="stop-color:#1d1d1d;stop-opacity:1;"
+         offset="1"
+         id="stop29" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient28"
+       id="linearGradient29"
+       x1="256.06598"
+       y1="43.933998"
+       x2="43.933968"
+       y2="256.06601"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     id="layer1"
+     style="display:inline;fill:#ffffff">
+    <path
+       id="rect1"
+       style="fill:none"
+       d="M 0,150 V 0 0 h 300 v 150" />
+    <path
+       id="path23"
+       style="fill:none"
+       d="M 300,150 V 300 H 0 V 150" />
+    <rect
+       style="fill:url(#linearGradient29);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       id="rect23"
+       width="300"
+       height="300"
+       x="0"
+       y="0" />
+  </g>
+  <g
+     id="layer2">
+    <g
+       id="g27">
+      <circle
+         style="display:inline;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#7676e5;stroke-width:8.07981;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+         id="path20"
+         cx="45.296333"
+         cy="45.296329"
+         r="25.960094" />
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#7676e5;stroke-width:8.59267;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+         id="ellipse20"
+         cx="255"
+         cy="255"
+         rx="25.703663"
+         ry="25.703665" />
+    </g>
+    <g
+       id="text24"
+       style="font-size:200.367px;font-family:Alatsi;-inkscape-font-specification:Alatsi;fill-rule:evenodd;stroke-width:0;paint-order:stroke fill markers"
+       transform="matrix(1.0733016,0,0,1.0397587,5.9993428,-8.6977746)"
+       aria-label="Sy">
+      <path
+         d="m 111.75516,224.76155 q -9.31707,0 -17.632299,-2.20404 -8.215047,-2.20404 -14.426424,-5.71046 -6.211377,-3.50642 -9.817983,-7.31339 l 10.218717,-21.03854 q 2.30422,3.0055 7.012845,6.41174 4.708625,3.40624 10.719635,5.81065 6.111189,2.4044 12.122199,2.4044 7.9145,0 13.22423,-4.30789 5.40991,-4.40807 5.40991,-12.32257 0,-5.10936 -2.50459,-8.81615 -2.40441,-3.80697 -6.51193,-6.71229 -4.00734,-3.00551 -12.42275,-8.11487 -11.521106,-7.01284 -18.033034,-11.92183 -6.511928,-5.00918 -11.320736,-13.02386 -4.708624,-8.11486 -4.708624,-19.53578 0,-11.12037 4.708624,-19.635968 4.808808,-8.615782 14.125874,-13.42459 9.317066,-4.808808 22.441106,-4.808808 21.33908,0 35.66533,13.023856 l -11.22056,20.43743 q -1.70312,-2.4044 -5.10936,-5.20954 -3.40623,-2.90532 -8.21504,-4.90899 -4.80881,-2.10385 -10.11854,-2.10385 -7.71413,0 -12.02202,4.50825 -4.207704,4.40808 -4.207704,11.12037 0,5.10936 2.504584,9.1167 2.60477,3.90716 6.7123,7.01285 4.20771,3.10569 11.22055,7.31339 12.72331,7.51377 19.4356,12.62312 6.71229,5.10936 11.22055,13.02386 4.60844,7.81431 4.60844,19.23523 0,12.12221 -5.20954,20.93835 -5.20954,8.81615 -14.92734,13.52478 -9.7178,4.60844 -22.94202,4.60844 z"
+         id="path25"
+         style="fill:#7676e5;fill-opacity:1;stroke:#7676e5;stroke-opacity:1" />
+      <path
+         style="font-size:100.183px;fill:#7676e5;fill-opacity:1;stroke:#7676e5;stroke-opacity:1"
+         d="m 179.97997,202.42074 -18.73422,-46.48491 h 13.92544 l 7.41354,22.24062 3.20585,11.52105 3.20586,-11.52105 7.51373,-22.24062 h 13.12397 l -25.44648,68.82572 h -12.32251 z"
+         id="path26" />
+    </g>
+    <path
+       style="display:inline;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#7676e5;stroke-width:16;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       d="M 44.6,94.4 V 257.13787 H 207.33786"
+       id="path27" />
+  </g>
+</svg>
