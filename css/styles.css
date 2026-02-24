@@ -1,0 +1,32 @@
+
+@font-face {
+  font-family: 'Inter';
+  src: url("../assets/fonts/Inter/Inter-VariableFont_opsz\,wght.ttf") format('truetype');
+}
+body {
+  font-family: 'Inter';
+  background-image: url("../assets/images/background_temp_2.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+  
+.info-container {
+  background-color: #F2F0EF;
+  border: 2px;
+  border-style: solid;
+  border-color: #343a40;
+  padding: 2rem 2rem 2rem 2rem;
+  border-radius: 15px;
+  margin: 5rem 0;
+}
+
+.navbar-nav .nav-item:not(:last-child) {
+  border-right: 2px solid #F2F0EF;
+}
+
+.info-paragraph {
+  font-size: large;
+  font-weight: 500;
+}
