@@ -30,3 +30,48 @@ body {
   font-size: large;
   font-weight: 500;
 }
+
+.portrait-card{
+  background-color: #F2F0EF;
+  border: 2px;
+  border-style: solid;
+  border-radius: 15px;
+  border-color: #343a40; 
+  transition: box-shadow 0.8s ease-out, transform 0.8s ease-out;
+}
+.portrait-card:hover {
+  box-shadow: 5px 5px 5px rgb(0 0 0 / 30%) !important;
+  transform: translate(-2px,-2px);
+}
+
+.portrait-image-small{
+  display: block;
+  border: 2px solid #dddddd;
+  width: 120px;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+.portrait-image-large{
+  border: 2px solid #dddddd;
+  width: 160px;
+  margin-left: 5%;
+  height: auto;
+}
+
+.outlined-text {
+  color: white;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.document-box{
+  background-color: #F2F0EF;
+  border: 2px;
+  border-style: solid;
+  border-color: #343a40; 
+  border-radius: 15px;
+}
