@@ -98,14 +98,15 @@ body {
 .portrait-card{
   background-color: rgba(242, 240, 239, .55);
   border: 2px;
+  border: 1px;
+  border-radius: 10px;
+  border-color: rgba(0,0,0,0.2);
   border-style: solid;
-  border-radius: 15px;
-  border-color: #343a40; 
   transition: box-shadow 0.8s ease-out, transform 0.8s ease-out;
 }
 .portrait-card:hover {
   box-shadow: 5px 5px 5px rgb(0 0 0 / 30%) !important;
-  transform: translate(-2px,-2px);
+  transform: translate(-1px,-1px);
 }
  
 .glide__track{
@@ -120,12 +121,12 @@ body {
 }
 .glide__slide{
   background-color: rgba(242, 240, 239, .4);
-  border: 2px;
-  border-style: solid;
   height: 70vh;
-  border-color: #343a40;
-  padding: 2rem 2rem 2rem 2rem;
-  border-radius: 15px;
+  border: 1px;
+  border-radius: 10px;
+  border-color: rgba(0,0,0,0.2);
+  border-style: solid;
+  padding: 5rem;
   margin: 5rem 0;
 }
 
