@@ -8,7 +8,16 @@
 }
 body {
   font-family: 'Inter';
-  background-color: #e6e6eb;
+  /*background-color: #e6e6eb;*/
+  margin: 0;
+  height: 100vh;
+  background-color: #e6e6eb; 
+  background-image: radial-gradient(
+    ellipse at 60% 30%, 
+    #7476dc -90%, 
+    transparent 40%
+  );
+  background-attachment: fixed;
 }
 
 .header-container{
@@ -97,7 +106,6 @@ body {
 
 .portrait-card{
   background-color: rgba(242, 240, 239, .55);
-  border: 2px;
   border: 1px;
   border-radius: 10px;
   border-color: rgba(0,0,0,0.2);
@@ -127,6 +135,8 @@ body {
   border-color: rgba(0,0,0,0.2);
   border-style: solid;
   padding: 5rem;
+  padding-left: 8rem;
+  padding-right: 8rem;
   margin: 5rem 0;
 }
 
@@ -170,4 +180,8 @@ body {
   border-style: solid;
   border-color: #343a40; 
   border-radius: 15px;
+}
+
+.footer{
+  
 }
