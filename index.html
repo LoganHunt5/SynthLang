@@ -5,46 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS Capstone</title>
 
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.theme.min.css">
+
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/styles.css">
 
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-dark navbar-dark sticky-top">
-      <div class="container">   
-        <a class="navbar-brand" href="index.html">
-          <img src="assets/images/logo_final.svg" alt="Team Icon" height="60">
+    <nav class="header-container outlined-text">
+      <div class="header">   
+        <a class="brand" href="index.html">
+          <img src="assets/images/logo_final.svg" alt="Team Icon" height="70px">
+          <h1 class="group-name">SynthLang</h1>
         </a>
-        <h1 class="text-light">Team SynthLang</h1>
 
-        <ul class="navbar-nav bar-links ml-auto">
-          <li class="nav-item"><a class="nav-link text-light" href="index.html">Home</a></li>
-          <li class="nav-item"><a class="nav-link text-light" href="about.html">About Us</a></li>
-          <li class="nav-item"><a class="nav-link text-light" href="documents.html">Documents</a></li>
-          <li class="nav-item"><a class="nav-link text-light" href="timeline.html">Timeline</a></li>
-        </ul>
+        <div class="header-nav">
+          <ul class="">
+            <li class="nav-item"><a class="" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="" href="about.html">About Us</a></li>
+            <li class="nav-item"><a class="" href="documents.html">Documents</a></li>
+            <li class="nav-item"><a class="" href="timeline.html">Timeline</a></li>
+          </ul>
+        </div>
       </div>
     </nav>
 
-    <div class="container col-8">
-      <div class="info-container shadow">
-        <h2 class="">Background</h2>
-        <p class="info-paragraph">
-          Speech is an important facet of many peoples lives both as a means for 
-          communcication and for engaging in the cuture(s) that they are a part of. 
-          For those with disabilities that affect their speech it can be difficult 
-          to integrate into their communities. To accomodate these disabilities, 
-          many choose to employ some form of speech synthesis. For under-resourced
-          languages, however, there might not be a model capable of producing speech
-          in their own language.
-        </p>
-      </div>
-      <div class="info-container shadow">
-        <h2>Our Project</h2>
-        <p></p>
-      </div>
+    <div class="main-container">
+      <div class="glide">
+        <div class="glide__track" data-glide-el="track">
+          <ul class="glide__slides">
+            <li class="glide__slide">
+              <h2 class="">Project Intoduction</h2>
+              <p class="info-paragraph">
+                We are developing SynthLang, a speech synthesizer for under resourced languages, specifically Navajo and Dine...
+              </p>
+            </li>
+            <li class="glide__slide">
+              <h2>Our Sponsor</h2>
+              <p></p>
+            </li>
+            <li class="glide__slide">
+              <h2>Problem Description</h2>
+              <p></p>
+            </li>
+            <li class="glide__slide">
+              <h2>Solution Overview</h2>
+              <p></p>
+            </li>
+            <li class="glide__slide">
+              <h2>Development Plan</h2>
+              <p></p>
+            </li>
+            <li class="glide__slide">
+              <h2>Our Advisor</h2>
+              <p></p>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Optional Arrows -->
+        <div class="glide__arrows" data-glide-el="controls">
+          <button class="glide__arrow glide__arrow--left" data-glide-dir="<">
+            <svg width="48" height="48" viewBox="0 0 24 24">
+              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+            </svg>
+          </button>
+          <button class="glide__arrow glide__arrow--right" data-glide-dir=">">
+            <svg width="48" height="48" viewBox="0 0 24 24">
+              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+            </svg>
+          </button>
+        </div>
+      </div>      
+
     </div>
+    <header>
+      <div class="container">
+        <div class="my-4 ml-4">
+          <h1 class="display-4  outlined-text"style="font-weight:700">Meet The Team</h1>
+        </div>
+      </div>
 
+      <div class="container">
+        <div class="row mb-4">
+          <div class="col-lg">
+            <div class="card h-100 shadow-sm custom-card portrait-card">
+              <div class="card-body text-start">
+                <img src="assets/images/paulm.jpg" class="rounded-circle profile-img mb-3 portrait-image-small" alt="Portrait">
+                <h5 class="fw-bold team-blue">Paul Mayoral</h5>
+                <p class="">
+                  <i>Team Lead, Coder</i>
+                </p>
+                <a href="mailto:prm85@nau.edu">
+                  prm85@nau.edu 
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg">
+            <div class="card h-100 shadow-sm custom-card portrait-card">
+              <div class="card-body text-start">
+                <img src="assets/images/loganh.jpg" class="rounded-circle profile-img mb-3 portrait-image-small" alt="Portrait">
+                <h5 class="fw-bold team-blue">Logan Hunt</h5>
+                <p class="">
+                  <i>Release Manager, Coder</i>
+                </p>
+                <a href="mailto:lbh93@nau.edu">
+                  lbh93@nau.edu 
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg">
+            <div class="card h-100 shadow-sm custom-card portrait-card">
+              <div class="card-body text-start">
+                <img src="assets/images/tylerb.jpg" class="rounded-circle profile-img mb-3 portrait-image-small" alt="Portrait">
+                <h5 class="fw-bold team-blue">Tyler Bryant</h5>
+                <p class="">
+                  <i>Recorder, Coder</i>
+                </p>
+                <a href="mailto:twb89@nau.edu">
+                  twb89@nau.edu
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg">
+            <div class="card h-100 shadow-sm custom-card portrait-card">
+              <div class="card-body text-start">
+                <img src="assets/images/jaylenj.png" class="rounded-circle profile-img mb-3 portrait-image-small" alt="Portrait">
+                <h5 class="fw-bold team-blue">Jaylen Jensen</h5>
+                <p class="">
+                  <i>Architect, Coder</i>
+                </p>
+                <a href="mailto:jjj338@nau.edu">
+                  jjj338@nau.edu
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg">
+            <div class="card h-100 shadow-sm custom-card portrait-card">
+              <div class="card-body text-start p-4">
+                <img src="assets/images/btucker.jpg" class="rounded-circle profile-img mb-3 portrait-image-large" alt="Portrait">
+                <h5 class="fw-bold team-blue">Dr. Benjamin Tucker</h5>
+                <p class="">
+                  <i>Sponsor</i>
+                </p>
+                <a href="mailto:Benjamin.Tucker@nau.edu">
+                  Benjamin.Tucker@nau.edu
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg">
+            <div class="card h-100 shadow-sm custom-card portrait-card">
+              <div class="card-body text-start p-4">
+                <img src="" class="rounded-circle profile-img mb-3 portrait-image-large" alt="Portrait">
+                <h5 class="fw-bold team-blue">Jeevana Kalapala</h5>
+                <p class="">
+                  <i>Mentor</i>
+                </p>
+                <a href="mailto:jk2396@nau.edu">
+                  jk2396@nau.edu
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
+    <script src="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/glide.min.js"></script>
+    <script>
+    new Glide('.glide', {
+      type: 'carousel',
+      startAt: 0,
+      perView: 1,
+      gap: 20,
+      autoplay: 7000,
+    }).mount();
+    </script>
   </body>
 </html>
