@@ -175,13 +175,13 @@ body {
 }
 
 .document-box{
-  background-color: #F2F0EF;
-  border: 2px;
+  background-color: rgba(242, 240, 239, .4);
+  border: 1px;
+  border-radius: 10px;
+  border-color: rgba(0,0,0,0.2);
   border-style: solid;
-  border-color: #343a40; 
-  border-radius: 15px;
 }
 
 .footer{
-  
+  padding-top: 3%;
 }
