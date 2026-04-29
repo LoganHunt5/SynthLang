@@ -91,7 +91,9 @@ body {
 }
 
 .info-paragraph {
-  font-size: large;
+  padding-top: 2rem;
+  padding: 2rem 1.5rem 0 1.5rem;
+  font-size: x-large;
   font-weight: 500;
 }
 
@@ -102,7 +104,7 @@ body {
   border-radius: 10px;
   border-color: rgba(0,0,0,0.2);
   border-style: solid;
-  transition: box-shadow 0.8s ease-out, transform 0.8s ease-out;
+  transition: box-shadow 0.3s ease-out, transform 0.3s ease-out;
 }
 .portrait-card:hover {
   box-shadow: 5px 5px 5px rgb(0 0 0 / 30%) !important;
