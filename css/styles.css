@@ -6,6 +6,10 @@
   font-family: 'Inter';
   src: url("../assets/fonts/Inter/Inter-VariableFont_opsz\,wght.ttf") format('truetype');
 }
+
+html {
+  scroll-behavior: smooth;
+}
 body {
   font-family: 'Inter';
   /*background-color: #e6e6eb;*/
@@ -18,13 +22,21 @@ body {
     transparent 40%
   );
   background-attachment: fixed;
+  padding-top: 10vh;
+}
+
+.divider {
+  border-top: 2px solid #ccc;
+  margin: 100px 0;
+  width: 100%;
 }
 
 .header-container{
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   z-index: 1000;
-  width 100%;
+  width: 100%;
   height: 10vh;
   background-color: rgba(0,0,0,0.04);
   box-shadow: 0 2px 1px rgba(0,0,0,0.1);
@@ -45,11 +57,17 @@ body {
   display: flex;
   align-items: center;
   height: 100%;
-  transition: color 0.3s;
+  transition: all 0.3s ease;
 }
 
 .nav-item a:hover {
   color: rgba(0, 0, 0, 0.5);
+}
+
+.nav-item a.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+  font-weight: bold;
 }
 
 .brand {
@@ -91,6 +109,7 @@ body {
 }
 .main-container{
   display:flex;
+  flex-direction: column;
   justify-content: center;
   align-items:center;
 }
@@ -154,6 +173,24 @@ body {
 .glide__arrow:hover {
   background: rgba(51, 51, 51, .5);
   color: #ffffff;
+}
+#glide-timeline h2 {
+  text-align: left;
+  margin: 0 0 10px 0;
+}
+
+#glide-timeline hr {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+
+#glide-timeline .glide__slide{
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .portrait-image-small{
