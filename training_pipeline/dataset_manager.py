@@ -43,16 +43,14 @@ class DatasetManager:
             meter = pyln.Meter(rate)
             loudness = meter.integrated_loudness(audio)
             #loudness normalized data 
-            sample["audio"] = pyln.normalize.loudness(audio, loudness, -23.0)
+            normalized_audio = pyln.normalize.loudness(audio, loudness, -23.0)
 
             processed_samples.append({
-                #should we have a field for the original audio path? and keep the normalized audio its own field?
-                "audio": sample["audio"],
-                "text": text
-                #should we have a field for loudness?
-                #"loudness": loudness
-                #should we have a field for sample rate?
-                #"sample_rate": rate
+                "audio_path": sample["audio"], # this is the path to the original audio file
+                "text": text,
+                "loudness": loudness,
+                "sample_rate": rate,
+                "normalized_audio": normalized_audio #this is the normalized audio
             })
         return processed_samples
     
