@@ -1,0 +1,28 @@
+@import "vars.css";
+@import "header.css";
+html, body {
+  margin: 0px;
+  padding: 0px;
+  display:flex;
+  flex-direction:column;
+  justify-content: center;
+  align-items: center;
+  min-width:100vw;
+  min-height: 100vh;
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--main-font);
+}
+
+.main-container{
+  flex:1;
+  display: flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.submit-form{
+  display: flex;
+  flex-direction:row;
+}

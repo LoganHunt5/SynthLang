@@ -1,0 +1,6 @@
+:root{
+  --bg-color: var(#fff);
+  --text-color: var(#000);
+  --main-font: 'Inter', sans-serif;
+  --header-color: rgba(0,0,0,1)
+}

@@ -1,0 +1,8 @@
+<option value="">Select a model...</option>
+{% if models %}
+{% for model in models %}
+<option value="{{ model.lower() }}">{{ model }}</option>
+{% endfor %}
+{% else %}
+<option value="">No models available</option>
+{% endif %}

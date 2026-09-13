@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FastAPI + HTMX</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="static/css/index.css">
+  </head>
+  <body>
+    {%include 'partials/header.html'%}
+    <div class="main-container">
+      <form class="submit-form" hx-post="/generate" hx-target="#player-container">
+        <input type="text" name="prompt" placeholder="Input Text Here"></input>
+        <div>
+          <label>Language</label>
+          <select name="language" hx-get="/language" hx-target="#model">
+            <option value="select">Select a Language</option>
+            <option value="english">English</option>
+            <option value="spanish">Spanish</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Model</label>
+          <select id="model" name="model">
+            <option value="">Select a language first</option>
+          </select>
+        </div>
+        <button type="submit">Generate</button>
+      </form>
+      <div id="player-container">
+      </div>
+    </div>
+    {%include 'partials/footer.html'%}
+  </body>
+</html>
