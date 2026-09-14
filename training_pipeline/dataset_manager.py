@@ -1,7 +1,5 @@
 import os
 import csv
-import soundfile as sf
-import pyloudnorm as pyln
 
 class DatasetManager:
     @staticmethod
@@ -33,26 +31,10 @@ class DatasetManager:
         return samples
 
     @staticmethod
-    def preprocess_dataset(samples):
-        processed_samples = []
+    def preprocess_text(samples):
         for sample in samples:
-            text = sample["text"].strip().lower()
-
-            audio, rate = sf.read(sample["audio"])
-
-            meter = pyln.Meter(rate)
-            loudness = meter.integrated_loudness(audio)
-            #loudness normalized data 
-            normalized_audio = pyln.normalize.loudness(audio, loudness, -23.0)
-
-            processed_samples.append({
-                "audio_path": sample["audio"], # this is the path to the original audio file
-                "text": text,
-                "loudness": loudness,
-                "sample_rate": rate,
-                "normalized_audio": normalized_audio #this is the normalized audio
-            })
-        return processed_samples
+            sample["text"] = sample["text"].strip().lower()
+        return samples
     
     # This should run BEFORE preprocessing, so that we don't get errors from 
     # the preprocessing step. It should also run before loading the dataset
