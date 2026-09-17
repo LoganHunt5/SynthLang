@@ -23,10 +23,13 @@ model:
 """.strip()
             )
 
-            result = config_manager.load_config(str(config_path))
+            manager = config_manager()
+            result = manager.load_config(str(config_path))
 
             self.assertEqual(result["training"]["batch_size"], 32)
             self.assertEqual(result["model"]["sample_rate"], 16000)
+            self.assertEqual(manager.model_config.sample_rate, 16000)
+            self.assertEqual(manager.training_config.batch_size, 32)
 
     def test_load_config_raises_runtime_error_for_bad_yaml(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -34,7 +37,7 @@ model:
             config_path.write_text("training: [bad")
 
             with self.assertRaises(RuntimeError):
-                config_manager.load_config(str(config_path))
+                config_manager().load_config(str(config_path))
 
     def test_config_validator_accepts_valid_config(self):
         valid_config = {
@@ -43,15 +46,15 @@ model:
             "model": {"sample_rate": 16000},
         }
 
-        self.assertEqual(config_manager.config_validator(valid_config), [])
+        self.assertEqual(config_manager().config_validator(valid_config), [])
 
     def test_config_validator_rejects_non_dict_input(self):
         self.assertEqual(
-            config_manager.config_validator(None),
+            config_manager().config_validator(None),
             ["config must be a dictionary"],
         )
         self.assertEqual(
-            config_manager.config_validator("not-a-dict"),
+            config_manager().config_validator("not-a-dict"),
             ["config must be a dictionary"],
         )
 

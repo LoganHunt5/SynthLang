@@ -1,56 +1,57 @@
 import os
 import csv
 
-class DatasetManager:
-    @staticmethod
-    def load_dataset(path: str, max_samples: int):
-        metadata_path = os.path.join(path, "metadata.csv")
-        audio_dir = os.path.join(path, "audio")
+from training_pipeline.config_manager import DatasetConfig
 
-        samples = []
 
-        if not os.path.exists(metadata_path):
-            raise ValueError("metadata.csv not found")
+def load_dataset(config: DatasetConfig):
+    metadata_path = os.path.join(config.path, config.meta_file_train)
+    audio_dir = os.path.join(config.path, "audio")
 
-        with open(metadata_path, "r") as f:
-            reader = csv.DictReader(f, delimiter="|")
-            for i, row in enumerate(reader):
-                if i >= max_samples:
-                    break
+    samples = []
 
-                audio_path = os.path.join(audio_dir, row["audio_file"])
+    if not os.path.exists(metadata_path):
+        raise ValueError(f"{config.meta_file_train} not found")
 
-                if not os.path.exists(audio_path):
-                    raise ValueError(f"Missing audio file: {row['audio_file']}")
+    with open(metadata_path, "r") as f:
+        reader = csv.DictReader(f, delimiter="|")
+        for i, row in enumerate(reader):
+            if i >= config.max_samples:
+                break
 
-                samples.append({
-                    "audio": audio_path,
-                    "text": row["text"]
-                })
+            audio_path = os.path.join(audio_dir, row["audio_file"])
 
-        return samples
+            if not os.path.exists(audio_path):
+                raise ValueError(f"Missing audio file: {row['audio_file']}")
 
-    @staticmethod
-    def preprocess_text(samples):
-        for sample in samples:
-            sample["text"] = sample["text"].strip().lower()
-        return samples
+            samples.append({
+                "audio": audio_path,
+                "text": row["text"]
+            })
+
+    return samples
+
     
-    # This should run BEFORE preprocessing, so that we don't get errors from 
-    # the preprocessing step. It should also run before loading the dataset
-    @staticmethod
-    def validate_dataset(samples):
-        errors = []
-        for sample in samples:
-            audio = sample.get("audio")
+def preprocess_text(samples):
+    for sample in samples:
+        sample["text"] = sample["text"].strip().lower()
+    return samples
 
-            if isinstance(audio, str):
-                if not os.path.exists(audio):
-                    errors.append(f"Missing audio file: {audio}")
-            elif audio is None:
-                errors.append("Missing audio file")
+    
+# This should run BEFORE preprocessing, so that we don't get errors from 
+# the preprocessing step. It should also run before loading the dataset    
+def validate_dataset(samples):
+    errors = []
+    for sample in samples:
+        audio = sample.get("audio")
 
-            text = sample.get("text")
-            if not text or not str(text).strip():
-                errors.append("Text is empty")
-        return errors
+        if isinstance(audio, str):
+            if not os.path.exists(audio):
+                errors.append(f"Missing audio file: {audio}")
+        elif audio is None:
+            errors.append("Missing audio file")
+
+        text = sample.get("text")
+        if not text or not str(text).strip():
+            errors.append("Text is empty")
+    return errors
