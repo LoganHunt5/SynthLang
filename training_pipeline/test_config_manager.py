@@ -7,7 +7,12 @@ from training_pipeline.config_manager import ConfigManager as config_manager
 def valid_config():
     return {
         "training": {"batch_size": 32, "learning_rate": 0.001, "epochs": 10},
-        "dataset": {"path": "data/train.csv", "max_samples": 50},
+        "dataset": {
+            "path": "data/train.csv",
+            "max_samples": 50,
+            "formatter": "default",
+            "meta_file_train": "metadata.csv",
+        },
         "model": {"sample_rate": 16000},
     }
 
@@ -23,6 +28,8 @@ training:
 dataset:
   path: data/train.csv
   max_samples: 50
+  formatter: default
+  meta_file_train: metadata.csv
 model:
   sample_rate: 16000
 """.strip()
@@ -60,7 +67,12 @@ def test_config_validator_rejects_non_dict_input():
 def test_config_validator_reports_invalid_values():
     config = {
         "training": {"batch_size": 0, "learning_rate": -0.1, "epochs": 0},
-        "dataset": {"path": "", "max_samples": 150},
+        "dataset": {
+            "path": "",
+            "max_samples": 150,
+            "formatter": "default",
+            "meta_file_train": "metadata.csv",
+        },
         "model": {"sample_rate": 0},
     }
 
@@ -77,7 +89,12 @@ def test_config_validator_reports_invalid_values():
 def test_config_validator_allows_boundary_values():
     config = {
         "training": {"batch_size": 1, "learning_rate": 1e-6, "epochs": 1},
-        "dataset": {"path": "data/sample.csv", "max_samples": 100},
+        "dataset": {
+            "path": "data/sample.csv",
+            "max_samples": 100,
+            "formatter": "default",
+            "meta_file_train": "metadata.csv",
+        },
         "model": {"sample_rate": 1},
     }
 

@@ -18,6 +18,8 @@ training:
 dataset:
   path: data/train.csv
   max_samples: 50
+  formatter: default
+  meta_file_train: metadata.csv
 model:
   sample_rate: 16000
 """.strip()
@@ -42,7 +44,12 @@ model:
     def test_config_validator_accepts_valid_config(self):
         valid_config = {
             "training": {"batch_size": 32, "learning_rate": 0.001, "epochs": 10},
-            "dataset": {"path": "data/train.csv", "max_samples": 50},
+            "dataset": {
+                "path": "data/train.csv",
+                "max_samples": 50,
+                "formatter": "default",
+                "meta_file_train": "metadata.csv",
+            },
             "model": {"sample_rate": 16000},
         }
 
