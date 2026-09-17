@@ -28,10 +28,13 @@ model:
 """.strip()
     )
 
-    result = config_manager().load_config(str(config_file))
+    manager = config_manager()
+    result = manager.load_config(str(config_file))
 
     assert result["training"]["batch_size"] == 32
     assert result["model"]["sample_rate"] == 16000
+    assert manager.model_config.sample_rate == 16000
+    assert manager.training_config.batch_size == 32
 
 
 def test_load_config_raises_runtime_error_for_bad_yaml(tmp_path):
@@ -39,18 +42,19 @@ def test_load_config_raises_runtime_error_for_bad_yaml(tmp_path):
     config_file.write_text("training: [bad")
 
     with pytest.raises(RuntimeError, match="Failed to load config"):
-        config_manager.load_config(str(config_file))
+        config_manager().load_config(str(config_file))
 
 
 def test_config_validator_accepts_valid_config(valid_config):
-    errors = config_manager.config_validator(valid_config)
+    errors = config_manager().config_validator(valid_config)
 
     assert errors == []
 
 
 def test_config_validator_rejects_non_dict_input():
-    assert config_manager.config_validator(None) == ["config must be a dictionary"]
-    assert config_manager.config_validator("not-a-dict") == ["config must be a dictionary"]
+    manager = config_manager()
+    assert manager.config_validator(None) == ["config must be a dictionary"]
+    assert manager.config_validator("not-a-dict") == ["config must be a dictionary"]
 
 
 def test_config_validator_reports_invalid_values():
@@ -77,13 +81,13 @@ def test_config_validator_allows_boundary_values():
         "model": {"sample_rate": 1},
     }
 
-    assert config_manager.config_validator(config) == []
+    assert config_manager().config_validator(config) == []
 
 
 def test_config_validator_handles_missing_sections():
     config = {}
 
-    errors = config_manager.config_validator(config)
+    errors = config_manager().config_validator(config)
 
     assert "dataset path must be provided" in errors
     assert "sample_rate must be > 0" in errors
