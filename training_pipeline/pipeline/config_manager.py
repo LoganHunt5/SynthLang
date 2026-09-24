@@ -1,13 +1,13 @@
 import yaml
 
 class ModelConfig:
-    def __init__(self, config: dict, type: str = "", sample_rate: int = 0):
-        self.config = config
+    def __init__(self, raw_config_dict: dict, type: str = "", sample_rate: int = 0):
+        self.raw_config_dict = raw_config_dict
         self.type = type
         self.sample_rate = sample_rate
 
     def get(self, key: str, default=None):
-        return self.config.get(key, default)
+        return self.raw_config_dict.get(key, default)
 
 class TrainingConfig:
     def __init__(self, epochs: int = 1, batch_size: int = 1,
@@ -26,9 +26,9 @@ class TrainingConfig:
         return getattr(self, key, default)
 
 class DatasetConfig:
-    def __init__(self, path:str, max_samples:int, formatter:str, meta_file_train:str):
+    def __init__(self, path:str, formatter:str, meta_file_train:str):
         self.path = path
-        self.max_samples = max_samples
+        #self.max_samples = max_samples
         self.formatter = formatter
         self.meta_file_train = meta_file_train
 
@@ -43,18 +43,22 @@ class ConfigManager:
         
     def load_config(self, path: str) -> dict:
         try:
-            with open(path, "r") as f:
-                config = yaml.safe_load(f)
+            # the whole contents
+            config_file = self._read_yaml(path)
 
-            errors = self.config_validator(config)
+            # validation
+            errors = self._validate_config_dict(config_file)
             if errors:
                 raise ValueError("; ".join(errors))
 
-            model = config["model"]
-            training = config["training"]
-            dataset = config["dataset"]
+            if not isinstance(config_file, dict):
+                raise ValueError("config must be a dictionary")
+
+            model = config_file["model"]
+            training = config_file["training"]
+            dataset = config_file["dataset"]
             self.model_config = ModelConfig(
-                config=model,
+                raw_config_dict=model,
                 type=model.get("type", ""),
                 sample_rate=model["sample_rate"],
             )
@@ -69,62 +73,84 @@ class ConfigManager:
             )
             self.dataset_config = DatasetConfig(
                 path=dataset["path"],
-                max_samples=dataset["max_samples"],
+                #max_samples=dataset["max_samples"],
                 formatter=dataset["formatter"],
                 meta_file_train=dataset["meta_file_train"],
             )
-            return config
+            return config_file
         except Exception as e:
             raise RuntimeError(f"Failed to load config: {e}")
+    
+    # These functions are to be only called by the load_config method
+    # Tyler, if I should make a more stricter access to these methods,
+    # let me know.
+    def _read_yaml(self, path: str):
+        with open(path, "r") as f:
+            return yaml.safe_load(f)
 
-    def config_validator(self, config: dict) -> list:
+    def _validate_config_dict(self, config_dict) -> list:
         errors = []
-
-        if not isinstance(config, dict):
+        
+        if not isinstance(config_dict, dict):
             return ["config must be a dictionary"]
 
         # --- Training validation ---
-        training = config.get("training", {})
+        training = config_dict.get("training", {})
         if not isinstance(training, dict):
+            errors.append("training must be a dictionary")
             training = {}
 
-        if training.get("batch_size", 1) <= 0:
+        batch_size = training.get("batch_size")
+        if not isinstance(batch_size, int) or isinstance(batch_size, bool):
+            errors.append("batch_size must be an integer")
+        elif batch_size <= 0:
             errors.append("batch_size must be > 0")
 
-        if training.get("learning_rate", 1e-3) <= 0:
+        learning_rate = training.get("learning_rate")
+        if not isinstance(learning_rate, (int, float)) or isinstance(learning_rate, bool):
+            errors.append("learning_rate must be a number")
+        elif learning_rate <= 0:
             errors.append("learning_rate must be > 0")
 
-        if training.get("epochs", 1) < 1:
+        epochs = training.get("epochs")
+        if not isinstance(epochs, int) or isinstance(epochs, bool):
+            errors.append("epochs must be an integer")
+        elif epochs < 1:
             errors.append("epochs must be >= 1")
 
         # --- Dataset validation ---
-        dataset = config.get("dataset", {})
+        dataset = config_dict.get("dataset", {})
         if not isinstance(dataset, dict):
+            errors.append("dataset must be a dictionary")
             dataset = {}
 
-        max_samples = dataset.get("max_samples", 0)
-        if not isinstance(max_samples, int) or isinstance(max_samples, bool):
-            errors.append("max_samples must be an integer")
-        elif max_samples <= 0:
-            errors.append("max_samples must be > 0")
-        elif max_samples > 100:
-            errors.append("Demo only supports datasets <= 100 samples")
+        #max_samples = dataset.get("max_samples", 0)
+        #if not isinstance(max_samples, int) or isinstance(max_samples, bool):
+        #    errors.append("max_samples must be an integer")
+        #elif max_samples <= 0:
+        #    errors.append("max_samples must be > 0")
+        #elif max_samples > 100:
+        #    errors.append("Demo only supports datasets <= 100 samples")
 
-        if not dataset.get("path"):
+        if not isinstance(dataset.get("path"), str) or not dataset.get("path"):
             errors.append("dataset path must be provided")
 
-        if not dataset.get("formatter"):
+        if not isinstance(dataset.get("formatter"), str) or not dataset.get("formatter"):
             errors.append("dataset formatter must be provided")
 
-        if not dataset.get("meta_file_train"):
+        if not isinstance(dataset.get("meta_file_train"), str) or not dataset.get("meta_file_train"):
             errors.append("dataset training metadata file must be provided")
 
         # --- Model validation ---
-        model = config.get("model", {})
+        model = config_dict.get("model", {})
         if not isinstance(model, dict):
+            errors.append("model must be a dictionary")
             model = {}
 
-        if model.get("sample_rate", 0) <= 0:
+        sample_rate = model.get("sample_rate")
+        if not isinstance(sample_rate, int) or isinstance(sample_rate, bool):
+            errors.append("sample_rate must be an integer")
+        elif sample_rate <= 0:
             errors.append("sample_rate must be > 0")
 
         return errors
