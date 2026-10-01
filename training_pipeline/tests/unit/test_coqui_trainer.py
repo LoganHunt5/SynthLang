@@ -80,7 +80,10 @@ class TestCoquiTrainer(unittest.TestCase):
 
         make_trainer.assert_called_once()
         make_trainer.return_value.fit.assert_called_once_with()
+<<<<<<< HEAD
         trainer_args.assert_called_once_with(restore_path="")
+=======
+>>>>>>> 104983a (Added logging capabiities to trainer coqui and unittest for trainer.)
         logger.info.assert_any_call("Preparing Coqui training")
         logger.info.assert_any_call(
             "Loaded %d training samples and %d evaluation samples",
@@ -90,6 +93,7 @@ class TestCoquiTrainer(unittest.TestCase):
         logger.info.assert_any_call("Starting Coqui trainer")
         logger.info.assert_any_call("Coqui training completed")
 
+<<<<<<< HEAD
     def test_train_passes_warm_start_checkpoint_to_coqui(self):
         dataset_cfg = SimpleNamespace(
             sample_rate=22050,
@@ -132,6 +136,8 @@ class TestCoquiTrainer(unittest.TestCase):
         trainer_args.assert_called_once_with(restore_path="checkpoints/model.pth")
         make_trainer.assert_called_once()
 
+=======
+>>>>>>> 104983a (Added logging capabiities to trainer coqui and unittest for trainer.)
 
 if __name__ == "__main__":
     unittest.main()
