@@ -18,7 +18,7 @@ def main():
         Path(__file__).resolve().parent / "logs" / "training_pipeline.log"
     )
     #config_manager = config_manager.ConfigManager()
-    #config_manager.load_config(config_path)
+    #config_manager.load_config(config_path) # define path to config file
 
     #dataset_manager = dataset_manager.DatasetManager()
     #samples = dataset_manager.load_dataset(config_manager.DatasetConfig)
