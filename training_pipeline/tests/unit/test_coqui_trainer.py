@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch, sentinel
+from unittest.mock import Mock, patch, sentinel
 
 from pipeline.coqui_trainer import CoquiTrainer
 
@@ -26,6 +26,7 @@ class TestCoquiTrainer(unittest.TestCase):
             model_config=SimpleNamespace(),
             training_config=training_cfg,
         )
+        logger = Mock()
 
         with (
             patch("pipeline.coqui_trainer.BaseAudioConfig") as audio_config,
@@ -50,7 +51,7 @@ class TestCoquiTrainer(unittest.TestCase):
             load_samples.return_value = (train_samples, eval_samples)
             make_model.return_value = model
 
-            CoquiTrainer().train(config)
+            CoquiTrainer(logger).train(config)
 
         audio_config.assert_called_once()
         self.assertEqual(
@@ -79,6 +80,14 @@ class TestCoquiTrainer(unittest.TestCase):
 
         make_trainer.assert_called_once()
         make_trainer.return_value.fit.assert_called_once_with()
+        logger.info.assert_any_call("Preparing Coqui training")
+        logger.info.assert_any_call(
+            "Loaded %d training samples and %d evaluation samples",
+            len(train_samples),
+            len(eval_samples),
+        )
+        logger.info.assert_any_call("Starting Coqui trainer")
+        logger.info.assert_any_call("Coqui training completed")
 
 
 if __name__ == "__main__":
