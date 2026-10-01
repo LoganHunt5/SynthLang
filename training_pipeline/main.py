@@ -13,6 +13,10 @@ def main():
     #config_manager = config_manager.ConfigManager()
     #config_manager.load_config(config_path)
 
+    #dataset_manager = dataset_manager.DatasetManager()
+    #samples = dataset_manager.load_dataset(config_manager.DatasetConfig)
+    #samples = dataset_manager.preprocess_text(samples)
+
     #trainer = CoquiTrainer(logger)
     #trainer.train(config_manager)
 if __name__ == "__main__":
