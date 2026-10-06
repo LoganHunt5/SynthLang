@@ -80,6 +80,7 @@ class TestCoquiTrainer(unittest.TestCase):
 
         make_trainer.assert_called_once()
         make_trainer.return_value.fit.assert_called_once_with()
+        trainer_args.assert_called_once_with(restore_path="")
         logger.info.assert_any_call("Preparing Coqui training")
         logger.info.assert_any_call(
             "Loaded %d training samples and %d evaluation samples",
@@ -88,6 +89,48 @@ class TestCoquiTrainer(unittest.TestCase):
         )
         logger.info.assert_any_call("Starting Coqui trainer")
         logger.info.assert_any_call("Coqui training completed")
+
+    def test_train_passes_warm_start_checkpoint_to_coqui(self):
+        dataset_cfg = SimpleNamespace(
+            sample_rate=22050,
+            formatter="ljspeech",
+            meta_file_train="metadata.csv",
+            path="/tmp/dataset",
+        )
+        training_cfg = SimpleNamespace(
+            batch_size=8,
+            eval_batch_size=4,
+            epochs=2,
+            output_path="/tmp/run",
+            eval_split_size=0.1,
+            eval_split_max_size=10,
+        )
+        config = SimpleNamespace(
+            dataset_config=dataset_cfg,
+            model_config=SimpleNamespace(),
+            training_config=training_cfg,
+        )
+        logger = Mock()
+
+        with (
+            patch("pipeline.coqui_trainer.BaseAudioConfig"),
+            patch("pipeline.coqui_trainer.BaseDatasetConfig"),
+            patch("pipeline.coqui_trainer.Tacotron2Config"),
+            patch("pipeline.coqui_trainer.AudioProcessor.init_from_config"),
+            patch("pipeline.coqui_trainer.TTSTokenizer.init_from_config") as init_tokenizer,
+            patch("pipeline.coqui_trainer.load_tts_samples", return_value=([], [])),
+            patch("pipeline.coqui_trainer.Tacotron2"),
+            patch("pipeline.coqui_trainer.TrainerArgs") as trainer_args,
+            patch("pipeline.coqui_trainer.CoquiTrainerClass") as make_trainer,
+        ):
+            init_tokenizer.return_value = (sentinel.tokenizer, sentinel.coqui_config)
+            CoquiTrainer(logger).train(
+                config,
+                warm_start_checkpoint="checkpoints/model.pth",
+            )
+
+        trainer_args.assert_called_once_with(restore_path="checkpoints/model.pth")
+        make_trainer.assert_called_once()
 
 
 if __name__ == "__main__":

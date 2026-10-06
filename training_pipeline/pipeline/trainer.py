@@ -1,10 +1,16 @@
-class Trainer:
-    """
-    Abstract base class for training models. Subclasses should implement the train method.
-    """
+from abc import ABC, abstractmethod
+from typing import Any
 
-    def train(self, *args, **kwargs):
-        """
-        Train the model. This method should be implemented by subclasses.
-        """
+
+class Trainer(ABC):
+    """Interface implemented by every model training backend."""
+
+    @abstractmethod
+    def train(
+        self,
+        config: Any,
+        *,
+        warm_start_checkpoint: str | None = None,
+    ) -> None:
+        """Train the configured model, optionally restoring a warm-start checkpoint."""
         raise NotImplementedError("Subclasses must implement the train method.")

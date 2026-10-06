@@ -22,10 +22,8 @@ class CoquiTrainer(BaseTrainer):
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
-    def train(self, config):
-        """
-        Train the Coqui model. This method should be implemented with the specific training logic for Coqui models.
-        """
+    def train(self, config, *, warm_start_checkpoint: str | None = None):
+        """Train the Coqui model, optionally restoring a model checkpoint."""
         dataset_cfg = config.dataset_config
         model_cfg = config.model_config
         training_cfg = config.training_config
@@ -33,7 +31,7 @@ class CoquiTrainer(BaseTrainer):
 
         # build coqui audio config
         coqui_audio_cfg =  BaseAudioConfig(
-            sample_rate=dataset_cfg.sample_rate,
+            sample_rate=model_cfg.sample_rate,
             do_trim_silence=True,
             trim_db=60,
             signal_norm=False,
@@ -47,7 +45,7 @@ class CoquiTrainer(BaseTrainer):
 
         # build coqui dataset config
         coqui_dataset_cfg = BaseDatasetConfig(
-            format=dataset_cfg.formatter,
+            formatter=dataset_cfg.formatter,
             meta_file_train=dataset_cfg.meta_file_train,
             path=dataset_cfg.path,
         )
@@ -107,7 +105,7 @@ class CoquiTrainer(BaseTrainer):
         model = Tacotron2(config, ap=ap, tokenizer=tokenizer)
 
         trainer = CoquiTrainerClass(
-            TrainerArgs(),
+            TrainerArgs(restore_path=warm_start_checkpoint or ""),
             config,
             training_cfg.output_path,
             model=model,

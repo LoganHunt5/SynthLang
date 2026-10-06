@@ -13,7 +13,9 @@ class TrainingConfig:
     def __init__(self, epochs: int = 1, batch_size: int = 1,
                  eval_batch_size: int = 1, learning_rate: float = 1e-3,
                  output_path: str = "",
-                 eval_split_size: float = 0.0, eval_split_max_size: int = 0):
+                 eval_split_size: float = 0.0, eval_split_max_size: int = 0,
+                 warm_start_enabled: bool = False,
+                 warm_start_checkpoint_path: str = ""):
         self.epochs = epochs
         self.batch_size = batch_size
         self.eval_batch_size = eval_batch_size
@@ -21,6 +23,8 @@ class TrainingConfig:
         self.output_path = output_path
         self.eval_split_size = eval_split_size
         self.eval_split_max_size = eval_split_max_size
+        self.warm_start_enabled = warm_start_enabled
+        self.warm_start_checkpoint_path = warm_start_checkpoint_path
 
     def get(self, key: str, default=None):
         return getattr(self, key, default)
@@ -62,6 +66,7 @@ class ConfigManager:
                 type=model.get("type", ""),
                 sample_rate=model["sample_rate"],
             )
+            warm_start = training.get("warm_start", {})
             self.training_config = TrainingConfig(
                 epochs=training["epochs"],
                 batch_size=training["batch_size"],
@@ -70,6 +75,8 @@ class ConfigManager:
                 output_path=training.get("output_path", ""),
                 eval_split_size=training.get("eval_split_size", 0.0),
                 eval_split_max_size=training.get("eval_split_max_size", 0),
+                warm_start_enabled=warm_start.get("enabled", False),
+                warm_start_checkpoint_path=warm_start.get("checkpoint_path", ""),
             )
             self.dataset_config = DatasetConfig(
                 path=dataset["path"],
@@ -117,6 +124,21 @@ class ConfigManager:
             errors.append("epochs must be an integer")
         elif epochs < 1:
             errors.append("epochs must be >= 1")
+
+        warm_start = training.get("warm_start", {})
+        if not isinstance(warm_start, dict):
+            errors.append("warm_start must be a dictionary")
+            warm_start = {}
+
+        warm_start_enabled = warm_start.get("enabled", False)
+        if not isinstance(warm_start_enabled, bool):
+            errors.append("warm_start.enabled must be a boolean")
+
+        checkpoint_path = warm_start.get("checkpoint_path", "")
+        if warm_start_enabled and (
+            not isinstance(checkpoint_path, str) or not checkpoint_path.strip()
+        ):
+            errors.append("warm_start.checkpoint_path must be a non-empty string")
 
         # --- Dataset validation ---
         dataset = config_dict.get("dataset", {})
