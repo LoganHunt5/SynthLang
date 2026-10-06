@@ -1,3 +1,4 @@
+import logging
 from pipeline.trainer import Trainer as BaseTrainer
 from pipeline.config_manager import ConfigManager
 import os
@@ -18,6 +19,9 @@ class CoquiTrainer(BaseTrainer):
     Trainer class for Coqui models. Inherits from the base Trainer class.
     """
 
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+
     def train(self, config):
         """
         Train the Coqui model. This method should be implemented with the specific training logic for Coqui models.
@@ -25,7 +29,7 @@ class CoquiTrainer(BaseTrainer):
         dataset_cfg = config.dataset_config
         model_cfg = config.model_config
         training_cfg = config.training_config
-
+        self.logger.info("Preparing Coqui training")
 
         # build coqui audio config
         coqui_audio_cfg =  BaseAudioConfig(
@@ -94,6 +98,11 @@ class CoquiTrainer(BaseTrainer):
             eval_split_max_size=training_cfg.eval_split_max_size,
             eval_split_size=training_cfg.eval_split_size,
         )
+        self.logger.info(
+            "Loaded %d training samples and %d evaluation samples",
+            len(train_samples),
+            len(eval_samples),
+        )
 
         model = Tacotron2(config, ap=ap, tokenizer=tokenizer)
 
@@ -106,4 +115,6 @@ class CoquiTrainer(BaseTrainer):
             eval_samples=eval_samples,
         )
 
+        self.logger.info("Starting Coqui trainer")
         trainer.fit()
+        self.logger.info("Coqui training completed")
