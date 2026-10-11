@@ -7,13 +7,15 @@
 # Expected layout (paths are relative to the training_pipeline directory):
 #   tmp/SSS_Output/*.wav                          Spanish audio (22050 Hz mono)
 #   tmp/SSS_small_15min.txt                       subset from scripts/make_small_subset.py
-#   tmp/tts_models--en--ek1--tacotron2/model_file.pth   English base model
+#   tmp/ek1_tacotron2_weights.pth                 English base model (ek1), from
+#                                                 scripts/convert_checkpoint.py
+#
+# Listen to results with scripts/synthesize.py, not only TensorBoard: the
+# TensorBoard test audio uses Coqui's inference, which can stop too early.
 
 backend: coqui
 
 training:
-  # Must match the batch size in model.params.gradual_training, which
-  # overrides it once training starts.
   batch_size: 8
   eval_batch_size: 8
   epochs: 100
@@ -56,10 +58,17 @@ model:
       is_sorted: true
 
     # --- Architecture: must match ek1 so every layer loads from the checkpoint ---
-    # The decoder is sized for r=7; the schedule then trains at r=2, where
-    # ek1 was at its last checkpoint. [start_step, r, batch_size].
+    # r = frames predicted per decoder step. ek1's layers are sized for r=7
+    # but it was last trained at r=2; at r=7 it never predicts "stop".
+    # The schedule ([start_step, r, batch_size]) trains at r=2 from step 0:
+    #   - its first entry must equal `r` (Coqui checks this), so layers are
+    #     sized for 7 and every weight loads;
+    #   - its last entry also starts at step 0, so r=2 is set before the data
+    #     loader is built. r must never change after that: Coqui builds the
+    #     loader once, and a later change of r crashes training.
+    # Keep the batch size here equal to training.batch_size; it overrides it.
     r: 7
-    gradual_training: [[0, 7, 8], [1, 2, 8]]
+    gradual_training: [[0, 7, 8], [0, 2, 8]]
     attention_type: original
     location_attn: true
     use_forward_attn: true
@@ -97,7 +106,19 @@ model:
     # Constant learning rate like ek1, instead of Coqui's Noam warmup, which
     # would spend this whole short run ramping up.
     lr_scheduler: null
+    # ek1's loss/optimizer settings (Coqui defaults: 0.2 and 5.0). In 6-epoch
+    # tests 15.0 and 0.2 behaved the same: both models stopped too early at
+    # inference (see scripts/synthesize.py for the workaround).
+    stopnet_pos_weight: 15.0
+    grad_clip: 1.0
     run_name: sss_spanish_finetune
+    # Pick best_model by spectrogram quality. The default (total eval loss)
+    # includes the noisy stop-token loss on a tiny eval set and kept
+    # selecting the first epoch.
+    target_loss: postnet_loss
+    # ~every 10 epochs (33 steps/epoch); Coqui keeps the last 5. The default
+    # (10000) never saves during a run this short.
+    save_step: 330
     # Synthesized each epoch (Griffin-Lim) so progress can be heard in TensorBoard.
     test_sentences:
       - "Hola, este es un modelo entrenado con muy pocos datos."
