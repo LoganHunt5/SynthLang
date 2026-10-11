@@ -4,16 +4,11 @@ from __future__ import annotations
 
 import argparse
 import logging
-from collections.abc import Callable
 from pathlib import Path
 
-from pipeline.coqui_trainer import CoquiTrainer
 from pipeline.config_manager import ConfigManager
 from pipeline.logger import configure_logger
-from pipeline.trainer import Trainer
-
-
-TrainerFactory = Callable[[logging.Logger], Trainer]
+from pipeline.registry import TrainerFactory, get_trainer_factory
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -44,7 +39,7 @@ def run(
             Path(__file__).resolve().parent.parent / "logs" / "training_pipeline.log"
         )
 
-    trainer_factory = trainer_factory or (lambda current_logger: CoquiTrainer(current_logger))
+    trainer_factory = trainer_factory or get_trainer_factory(config_manager.backend)
     trainer = trainer_factory(logger)
     warm_start = config_manager.training_config.warm_start_enabled
     checkpoint = config_manager.training_config.warm_start_checkpoint_path

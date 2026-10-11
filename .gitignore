@@ -2,3 +2,4 @@ web_app/Data/*
 __pycache__/
 .venv
 training_pipeline/tmp/*
+training_pipeline/logs/*

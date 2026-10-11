@@ -98,7 +98,7 @@ model:
             self.assertEqual(manager.training_config.output_path, "")
             self.assertEqual(manager.training_config.eval_split_size, 0.0)
             self.assertEqual(manager.training_config.eval_split_max_size, 0)
-            self.assertEqual(manager.model_config.type, "")
+            self.assertEqual(manager.model_config.type, "tacotron2")
 
     # tests for minimum boundary values
     def test_load_config_accepts_lower_boundary_values(self):
@@ -177,6 +177,51 @@ model:
             config_path = self._write_config(tmp_dir, config)
 
             self.assertIsInstance(config_manager().load_config(str(config_path)), dict)
+
+    # tests for backend selection and model params
+    def test_load_config_defaults_backend_and_model_type(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            config_path = self._write_config(tmp_dir, self._valid_config())
+            manager = config_manager()
+            manager.load_config(str(config_path))
+
+        self.assertEqual(manager.backend, "coqui")
+        self.assertEqual(manager.model_config.type, "tacotron2")
+        self.assertEqual(manager.model_config.params, {})
+
+    def test_load_config_reads_backend_and_model_params(self):
+        config = self._valid_config()
+        config["backend"] = "coqui"
+        config["model"]["type"] = "tacotron2"
+        config["model"]["params"] = {"r": 7, "attention_type": "original"}
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            config_path = self._write_config(tmp_dir, config)
+            manager = config_manager()
+            manager.load_config(str(config_path))
+
+        self.assertEqual(manager.backend, "coqui")
+        self.assertEqual(
+            manager.model_config.params,
+            {"r": 7, "attention_type": "original"},
+        )
+
+    def test_load_config_rejects_invalid_backend_and_params(self):
+        config = self._valid_config()
+        config["backend"] = ""
+        config["model"]["type"] = 5
+        config["model"]["params"] = ["r", 7]
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            config_path = self._write_config(tmp_dir, config)
+
+            with self.assertRaises(RuntimeError) as context:
+                config_manager().load_config(str(config_path))
+
+        message = str(context.exception)
+        self.assertIn("backend must be a non-empty string", message)
+        self.assertIn("model type must be a non-empty string", message)
+        self.assertIn("model params must be a dictionary", message)
 
 
 if __name__ == "__main__":

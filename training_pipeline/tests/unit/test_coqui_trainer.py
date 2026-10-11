@@ -2,13 +2,12 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch, sentinel
 
-from pipeline.coqui_trainer import CoquiTrainer
+from pipeline.coqui_trainer import COQUI_MODELS, CoquiModelSpec, CoquiTrainer
 
 
 class TestCoquiTrainer(unittest.TestCase):
-    def test_train_builds_model_and_starts_fit(self):
+    def _config(self, model_type="tacotron2", params=None):
         dataset_cfg = SimpleNamespace(
-            sample_rate=22050,
             formatter="ljspeech",
             meta_file_train="metadata.csv",
             path="/tmp/dataset",
@@ -17,120 +16,156 @@ class TestCoquiTrainer(unittest.TestCase):
             batch_size=8,
             eval_batch_size=4,
             epochs=2,
+            learning_rate=0.005,
             output_path="/tmp/run",
             eval_split_size=0.1,
             eval_split_max_size=10,
         )
-        config = SimpleNamespace(
+        model_cfg = SimpleNamespace(
+            type=model_type,
+            sample_rate=22050,
+            params=params or {},
+        )
+        return SimpleNamespace(
             dataset_config=dataset_cfg,
-            model_config=SimpleNamespace(),
+            model_config=model_cfg,
             training_config=training_cfg,
         )
-        logger = Mock()
+
+    def _train(self, config, *, defaults=None, warm_start_checkpoint=None):
+        """Run CoquiTrainer.train with Coqui mocked out; return the mocks."""
+        spec = CoquiModelSpec(
+            config_cls=Mock(name="config_cls"),
+            model_cls=Mock(name="model_cls"),
+            defaults=defaults or {},
+        )
+        mocks = SimpleNamespace(spec=spec, logger=Mock())
 
         with (
-            patch("pipeline.coqui_trainer.BaseAudioConfig") as audio_config,
-            patch("pipeline.coqui_trainer.BaseDatasetConfig") as dataset_config,
-            patch("pipeline.coqui_trainer.Tacotron2Config") as model_config,
-            patch("pipeline.coqui_trainer.AudioProcessor.init_from_config") as init_audio,
-            patch("pipeline.coqui_trainer.TTSTokenizer.init_from_config") as init_tokenizer,
-            patch("pipeline.coqui_trainer.load_tts_samples") as load_samples,
-            patch("pipeline.coqui_trainer.Tacotron2") as make_model,
-            patch("pipeline.coqui_trainer.TrainerArgs") as trainer_args,
-            patch("pipeline.coqui_trainer.CoquiTrainerClass") as make_trainer,
+            patch.dict(COQUI_MODELS, {"tacotron2": spec}, clear=True),
+            patch("pipeline.coqui_trainer.BaseAudioConfig") as mocks.audio_config,
+            patch("pipeline.coqui_trainer.BaseDatasetConfig") as mocks.dataset_config,
+            patch("pipeline.coqui_trainer.AudioProcessor.init_from_config") as mocks.init_audio,
+            patch("pipeline.coqui_trainer.TTSTokenizer.init_from_config") as mocks.init_tokenizer,
+            patch("pipeline.coqui_trainer.load_tts_samples") as mocks.load_samples,
+            patch("pipeline.coqui_trainer.TrainerArgs") as mocks.trainer_args,
+            patch("pipeline.coqui_trainer.CoquiTrainerClass") as mocks.make_trainer,
         ):
-            audio_processor = sentinel.audio_processor
-            tokenizer = sentinel.tokenizer
-            coqui_config = sentinel.coqui_config
-            train_samples = [sentinel.train_sample]
-            eval_samples = [sentinel.eval_sample]
-            model = sentinel.model
+            mocks.init_audio.return_value = sentinel.audio_processor
+            mocks.init_tokenizer.return_value = (sentinel.tokenizer, sentinel.coqui_config)
+            mocks.load_samples.return_value = (
+                [sentinel.train_sample],
+                [sentinel.eval_sample],
+            )
+            CoquiTrainer(mocks.logger).train(
+                config,
+                warm_start_checkpoint=warm_start_checkpoint,
+            )
+        return mocks
 
-            init_audio.return_value = audio_processor
-            init_tokenizer.return_value = (tokenizer, coqui_config)
-            load_samples.return_value = (train_samples, eval_samples)
-            make_model.return_value = model
+    def test_train_builds_model_and_starts_fit(self):
+        config = self._config()
+        mocks = self._train(config, defaults={"r": 2})
 
-            CoquiTrainer(logger).train(config)
-
-        audio_config.assert_called_once()
         self.assertEqual(
-            audio_config.call_args.kwargs["sample_rate"],
-            dataset_cfg.sample_rate,
+            mocks.audio_config.call_args.kwargs["sample_rate"],
+            config.model_config.sample_rate,
+        )
+        mocks.dataset_config.assert_called_once_with(
+            formatter="ljspeech",
+            meta_file_train="metadata.csv",
+            path="/tmp/dataset",
         )
 
-        dataset_config.assert_called_once_with(
-            format=dataset_cfg.formatter,
-            meta_file_train=dataset_cfg.meta_file_train,
-            path=dataset_cfg.path,
-        )
+        model_kwargs = mocks.spec.config_cls.call_args.kwargs
+        self.assertEqual(model_kwargs["batch_size"], 8)
+        self.assertEqual(model_kwargs["epochs"], 2)
+        self.assertEqual(model_kwargs["r"], 2)
 
-        model_config.assert_called_once()
-        self.assertEqual(model_config.call_args.kwargs["batch_size"], 8)
-        self.assertEqual(model_config.call_args.kwargs["epochs"], 2)
-
-        init_audio.assert_called_once_with(model_config.return_value)
-        init_tokenizer.assert_called_once_with(model_config.return_value)
-        load_samples.assert_called_once()
-        make_model.assert_called_once_with(
-            coqui_config,
-            ap=audio_processor,
-            tokenizer=tokenizer,
+        coqui_model_cfg = mocks.spec.config_cls.return_value
+        mocks.init_audio.assert_called_once_with(coqui_model_cfg)
+        mocks.init_tokenizer.assert_called_once_with(coqui_model_cfg)
+        mocks.spec.model_cls.assert_called_once_with(
+            sentinel.coqui_config,
+            ap=sentinel.audio_processor,
+            tokenizer=sentinel.tokenizer,
         )
-
-        make_trainer.assert_called_once()
-        make_trainer.return_value.fit.assert_called_once_with()
-        trainer_args.assert_called_once_with(restore_path="")
-        logger.info.assert_any_call("Preparing Coqui training")
-        logger.info.assert_any_call(
-            "Loaded %d training samples and %d evaluation samples",
-            len(train_samples),
-            len(eval_samples),
+        mocks.trainer_args.assert_called_once_with(restore_path="")
+        mocks.make_trainer.return_value.fit.assert_called_once_with()
+        mocks.logger.info.assert_any_call("Preparing Coqui %s training", "tacotron2")
+        mocks.logger.info.assert_any_call(
+            "Loaded %d training samples and %d evaluation samples", 1, 1
         )
-        logger.info.assert_any_call("Starting Coqui trainer")
-        logger.info.assert_any_call("Coqui training completed")
+        mocks.logger.info.assert_any_call("Coqui training completed")
+
+    def test_train_passes_learning_rate_as_coqui_lr(self):
+        mocks = self._train(self._config())
+
+        self.assertEqual(mocks.spec.config_cls.call_args.kwargs["lr"], 0.005)
+
+    def test_model_params_override_defaults_and_generic_settings(self):
+        config = self._config(params={"r": 7, "lr": 0.0001, "phoneme_language": "es"})
+        mocks = self._train(config, defaults={"r": 2})
+
+        model_kwargs = mocks.spec.config_cls.call_args.kwargs
+        self.assertEqual(model_kwargs["r"], 7)
+        self.assertEqual(model_kwargs["lr"], 0.0001)
+        self.assertEqual(model_kwargs["phoneme_language"], "es")
+
+    def test_nested_audio_and_characters_params_build_coqui_configs(self):
+        config = self._config(params={
+            "audio": {"preemphasis": 0.99, "signal_norm": True},
+            "characters": {"pad": "_", "characters": "abc"},
+        })
+
+        with patch("pipeline.coqui_trainer.CharactersConfig") as characters_config:
+            mocks = self._train(config)
+
+        audio_kwargs = mocks.audio_config.call_args.kwargs
+        self.assertEqual(audio_kwargs["preemphasis"], 0.99)
+        self.assertTrue(audio_kwargs["signal_norm"])
+        self.assertEqual(audio_kwargs["sample_rate"], 22050)
+        characters_config.assert_called_once_with(pad="_", characters="abc")
+        model_kwargs = mocks.spec.config_cls.call_args.kwargs
+        self.assertIs(model_kwargs["characters"], characters_config.return_value)
+        self.assertIs(model_kwargs["audio"], mocks.audio_config.return_value)
+        # the user's config object is not mutated
+        self.assertIn("audio", config.model_config.params)
+
+    def test_unknown_audio_param_is_rejected(self):
+        config = self._config(params={"audio": {"not_a_real_option": 1}})
+
+        with (
+            patch("pipeline.coqui_trainer.BaseDatasetConfig"),
+            self.assertRaisesRegex(ValueError, "Invalid model.params.audio.*not_a_real_option"),
+        ):
+            CoquiTrainer(Mock()).train(config)
 
     def test_train_passes_warm_start_checkpoint_to_coqui(self):
-        dataset_cfg = SimpleNamespace(
-            sample_rate=22050,
-            formatter="ljspeech",
-            meta_file_train="metadata.csv",
-            path="/tmp/dataset",
+        mocks = self._train(
+            self._config(),
+            warm_start_checkpoint="checkpoints/model.pth",
         )
-        training_cfg = SimpleNamespace(
-            batch_size=8,
-            eval_batch_size=4,
-            epochs=2,
-            output_path="/tmp/run",
-            eval_split_size=0.1,
-            eval_split_max_size=10,
-        )
-        config = SimpleNamespace(
-            dataset_config=dataset_cfg,
-            model_config=SimpleNamespace(),
-            training_config=training_cfg,
-        )
-        logger = Mock()
 
+        mocks.trainer_args.assert_called_once_with(restore_path="checkpoints/model.pth")
+        mocks.make_trainer.assert_called_once()
+
+    def test_unknown_model_type_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "fastspeech9.*Available types: tacotron2"):
+            self._train(self._config(model_type="fastspeech9"))
+
+    def test_unknown_model_param_is_rejected(self):
+        spec = COQUI_MODELS["tacotron2"]
+        config = self._config(params={"not_a_real_option": 1})
+
+        # Use the real Coqui config class so its own validation is exercised.
         with (
-            patch("pipeline.coqui_trainer.BaseAudioConfig"),
+            patch.dict(COQUI_MODELS, {"tacotron2": spec}),
             patch("pipeline.coqui_trainer.BaseDatasetConfig"),
-            patch("pipeline.coqui_trainer.Tacotron2Config"),
-            patch("pipeline.coqui_trainer.AudioProcessor.init_from_config"),
-            patch("pipeline.coqui_trainer.TTSTokenizer.init_from_config") as init_tokenizer,
-            patch("pipeline.coqui_trainer.load_tts_samples", return_value=([], [])),
-            patch("pipeline.coqui_trainer.Tacotron2"),
-            patch("pipeline.coqui_trainer.TrainerArgs") as trainer_args,
-            patch("pipeline.coqui_trainer.CoquiTrainerClass") as make_trainer,
+            patch("pipeline.coqui_trainer.BaseAudioConfig"),
+            self.assertRaisesRegex(ValueError, "Invalid model.params.*not_a_real_option"),
         ):
-            init_tokenizer.return_value = (sentinel.tokenizer, sentinel.coqui_config)
-            CoquiTrainer(logger).train(
-                config,
-                warm_start_checkpoint="checkpoints/model.pth",
-            )
-
-        trainer_args.assert_called_once_with(restore_path="checkpoints/model.pth")
-        make_trainer.assert_called_once()
+            CoquiTrainer(Mock()).train(config)
 
 
 if __name__ == "__main__":

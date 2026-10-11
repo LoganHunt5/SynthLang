@@ -1,10 +1,17 @@
 import yaml
 
+DEFAULT_BACKEND = "coqui"
+DEFAULT_MODEL_TYPE = "tacotron2"
+
 class ModelConfig:
-    def __init__(self, raw_config_dict: dict, type: str = "", sample_rate: int = 0):
+    def __init__(self, raw_config_dict: dict, type: str = "", sample_rate: int = 0,
+                 params: dict | None = None):
         self.raw_config_dict = raw_config_dict
         self.type = type
         self.sample_rate = sample_rate
+        # Backend/architecture specific hyperparameters, passed through as-is
+        # and validated by the backend that consumes them.
+        self.params = params or {}
 
     def get(self, key: str, default=None):
         return self.raw_config_dict.get(key, default)
@@ -41,6 +48,7 @@ class DatasetConfig:
     
 class ConfigManager:
     def __init__(self):
+        self.backend = None
         self.model_config = None
         self.training_config = None
         self.dataset_config = None
@@ -61,10 +69,12 @@ class ConfigManager:
             model = config_file["model"]
             training = config_file["training"]
             dataset = config_file["dataset"]
+            self.backend = config_file.get("backend", DEFAULT_BACKEND)
             self.model_config = ModelConfig(
                 raw_config_dict=model,
-                type=model.get("type", ""),
+                type=model.get("type", DEFAULT_MODEL_TYPE),
                 sample_rate=model["sample_rate"],
+                params=model.get("params", {}),
             )
             warm_start = training.get("warm_start", {})
             self.training_config = TrainingConfig(
@@ -100,6 +110,10 @@ class ConfigManager:
         
         if not isinstance(config_dict, dict):
             return ["config must be a dictionary"]
+
+        backend = config_dict.get("backend", DEFAULT_BACKEND)
+        if not isinstance(backend, str) or not backend:
+            errors.append("backend must be a non-empty string")
 
         # --- Training validation ---
         training = config_dict.get("training", {})
@@ -174,5 +188,12 @@ class ConfigManager:
             errors.append("sample_rate must be an integer")
         elif sample_rate <= 0:
             errors.append("sample_rate must be > 0")
+
+        model_type = model.get("type", DEFAULT_MODEL_TYPE)
+        if not isinstance(model_type, str) or not model_type:
+            errors.append("model type must be a non-empty string")
+
+        if not isinstance(model.get("params", {}), dict):
+            errors.append("model params must be a dictionary")
 
         return errors

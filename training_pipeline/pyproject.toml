@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "coqui-tts[codec]>=0.27.5",
+    "coqui-tts[codec,languages]>=0.27.5",
     "torch>=2.14.0",
     "torchaudio>=2.11.0",
     "transformers==5.0.0",

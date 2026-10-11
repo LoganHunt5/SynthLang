@@ -91,6 +91,26 @@ class TestCli(unittest.TestCase):
                     logger=logging.getLogger("test_cli_invalid"),
                 )
 
+    def test_run_rejects_unknown_backend(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = self._write_config(directory)
+            config = yaml.safe_load(config_path.read_text())
+            config["backend"] = "not_a_backend"
+            config_path.write_text(yaml.safe_dump(config))
+
+            with self.assertRaisesRegex(ValueError, "Unknown backend 'not_a_backend'"):
+                run(config_path, logger=logging.getLogger("test_cli_backend"))
+
+    def test_registry_resolves_coqui_backend(self):
+        from pipeline.coqui_trainer import CoquiTrainer
+        from pipeline.registry import get_trainer_factory
+
+        logger = logging.getLogger("test_cli_registry")
+        trainer = get_trainer_factory("coqui")(logger)
+
+        self.assertIsInstance(trainer, CoquiTrainer)
+        self.assertIs(trainer.logger, logger)
+
 
 if __name__ == "__main__":
     unittest.main()

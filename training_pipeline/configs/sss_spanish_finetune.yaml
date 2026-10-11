@@ -1,0 +1,105 @@
+# Proof of concept: fine-tune the pretrained English Tacotron2 (ek1) on a
+# 15 minute Spanish subset of SSS_Output to simulate a low-resource language.
+#
+# Run from the training_pipeline directory:
+#   uv run training-pipeline configs/sss_spanish_finetune.yaml
+#
+# Expected layout (paths are relative to the training_pipeline directory):
+#   tmp/SSS_Output/*.wav                          Spanish audio (22050 Hz mono)
+#   tmp/SSS_small_15min.txt                       subset from scripts/make_small_subset.py
+#   tmp/tts_models--en--ek1--tacotron2/model_file.pth   English base model
+
+backend: coqui
+
+training:
+  # Must match the batch size in model.params.gradual_training, which
+  # overrides it once training starts.
+  batch_size: 8
+  eval_batch_size: 8
+  epochs: 100
+  # ek1 was trained at 1e-4; fine-tuning should not use a larger rate.
+  learning_rate: 0.0001
+  output_path: tmp/sss_finetune
+  eval_split_size: 0.1
+  eval_split_max_size: 30
+  warm_start:
+    enabled: true
+    checkpoint_path: tmp/ek1_tacotron2_weights.pth
+
+dataset:
+  # css10 reads "relative/audio.wav|text" lines relative to this folder.
+  path: tmp
+  formatter: css10
+  meta_file_train: SSS_small_15min.txt
+
+model:
+  type: tacotron2
+  sample_rate: 22050
+  params:
+    # --- Text: Spanish phonemes mapped onto ek1's IPA symbol set ---
+    phoneme_language: es
+    phonemizer: gruut
+    # The default cleaners expand numbers and abbreviations in English.
+    text_cleaner: multilingual_phoneme_cleaners
+    # ek1's exact symbol set. Order and size must match the checkpoint's text
+    # embedding, otherwise every symbol loads the wrong weights.
+    characters:
+      characters_class: TTS.tts.utils.text.characters.IPAPhonemes
+      pad: _
+      eos: "~"
+      bos: ^
+      blank: null
+      characters: "abcdefhijklmnopqrstuvwxyzæçðøħŋœǀǁǂǃɐɑɒɓɔɕɖɗɘəɚɛɜɞɟɠɡɢɣɤɥɦɧɨɪɫɬɭɮɯɰɱɲɳɴɵɶɸɹɺɻɽɾʀʁʂʃʄʈʉʊʋʌʍʎʏʐʑʒʔʕʘʙʛʜʝʟʡʢˈˌːˑ˞βθχᵻⱱ"
+      punctuations: "!'(),-.:;? "
+      phonemes: null
+      is_unique: true
+      is_sorted: true
+
+    # --- Architecture: must match ek1 so every layer loads from the checkpoint ---
+    # The decoder is sized for r=7; the schedule then trains at r=2, where
+    # ek1 was at its last checkpoint. [start_step, r, batch_size].
+    r: 7
+    gradual_training: [[0, 7, 8], [1, 2, 8]]
+    attention_type: original
+    location_attn: true
+    use_forward_attn: true
+    forward_attn_mask: false
+    attention_norm: sigmoid
+    windowing: false
+    transition_agent: false
+    prenet_type: original
+    prenet_dropout: false
+    stopnet: true
+    separate_stopnet: true
+    double_decoder_consistency: false
+    bidirectional_decoder: false
+    memory_size: -1
+
+    # --- Audio: ek1's spectrogram settings, so its decoder output still fits ---
+    audio:
+      fft_size: 1024
+      win_length: 1024
+      hop_length: 256
+      num_mels: 80
+      preemphasis: 0.99
+      ref_level_db: 0
+      power: 1.8
+      mel_fmin: 0.0
+      mel_fmax: 8000.0
+      spec_gain: 1.0
+      signal_norm: true
+      min_level_db: -10
+      symmetric_norm: true
+      max_norm: 4.0
+      clip_norm: true
+
+    # --- Fine-tuning schedule ---
+    # Constant learning rate like ek1, instead of Coqui's Noam warmup, which
+    # would spend this whole short run ramping up.
+    lr_scheduler: null
+    run_name: sss_spanish_finetune
+    # Synthesized each epoch (Griffin-Lim) so progress can be heard in TensorBoard.
+    test_sentences:
+      - "Hola, este es un modelo entrenado con muy pocos datos."
+      - "La prevalencia mundial estimada es muy alta en niños."
+      - "Wikipedia es una enciclopedia libre y colaborativa."
