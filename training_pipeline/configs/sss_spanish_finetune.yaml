@@ -1,12 +1,10 @@
 # Proof of concept: fine-tune the pretrained English Tacotron2 (ek1) on a
-# 15 minute Spanish subset of SSS_Output to simulate a low-resource language.
+# 1 hour Spanish subset of SSS_Output to simulate a low-resource language.
 #
-# Run from the training_pipeline directory:
-#   uv run training-pipeline configs/sss_spanish_finetune.yaml
 #
 # Expected layout (paths are relative to the training_pipeline directory):
 #   tmp/SSS_Output/*.wav                          Spanish audio (22050 Hz mono)
-#   tmp/SSS_small_15min.txt                       subset from scripts/make_small_subset.py
+#   tmp/SSS_small_60min.txt                       subset from scripts/make_small_subset.py
 #   tmp/ek1_tacotron2_weights.pth                 English base model (ek1), from
 #                                                 scripts/convert_checkpoint.py
 #
@@ -16,14 +14,23 @@
 backend: coqui
 
 training:
-  batch_size: 8
-  eval_batch_size: 8
-  epochs: 100
+  # Sized for a 24 GB Titan RTX. ek1's own last phase also used r=2 with a
+  # batch of 32 at lr 1e-4. Must match the batch size in
+  # model.params.gradual_training, which overrides it.
+  batch_size: 32
+  eval_batch_size: 32
+  # A ceiling, not a target: ~36 steps/epoch, so ~36k steps. Stop early
+  # (Ctrl+C saves a checkpoint) once the samples stop improving, or pick the
+  # best checkpoint by listening. One hour of audio overfits long before the
+  # paper's 72 h on faster hardware.
+  epochs: 1000
   # ek1 was trained at 1e-4; fine-tuning should not use a larger rate.
   learning_rate: 0.0001
   output_path: tmp/sss_finetune
   eval_split_size: 0.1
-  eval_split_max_size: 30
+  # More eval clips make best_model selection (eval postnet_loss, which rises
+  # once the model overfits) more reliable.
+  eval_split_max_size: 60
   warm_start:
     enabled: true
     checkpoint_path: tmp/ek1_tacotron2_weights.pth
@@ -32,7 +39,7 @@ dataset:
   # css10 reads "relative/audio.wav|text" lines relative to this folder.
   path: tmp
   formatter: css10
-  meta_file_train: SSS_small_15min.txt
+  meta_file_train: SSS_small_60min.txt
 
 model:
   type: tacotron2
@@ -68,7 +75,7 @@ model:
     #     loader once, and a later change of r crashes training.
     # Keep the batch size here equal to training.batch_size; it overrides it.
     r: 7
-    gradual_training: [[0, 7, 8], [0, 2, 8]]
+    gradual_training: [[0, 7, 32], [0, 2, 32]]
     attention_type: original
     location_attn: true
     use_forward_attn: true
@@ -116,9 +123,10 @@ model:
     # includes the noisy stop-token loss on a tiny eval set and kept
     # selecting the first epoch.
     target_loss: postnet_loss
-    # ~every 10 epochs (33 steps/epoch); Coqui keeps the last 5. The default
-    # (10000) never saves during a run this short.
-    save_step: 330
+    # ~every 55 epochs (~36 steps/epoch); keep 10 (~3.5 GB, ~350 MB each)
+    # so earlier checkpoints survive for comparison if later ones overfit.
+    save_step: 2000
+    save_n_checkpoints: 10
     # Synthesized each epoch (Griffin-Lim) so progress can be heard in TensorBoard.
     test_sentences:
       - "Hola, este es un modelo entrenado con muy pocos datos."

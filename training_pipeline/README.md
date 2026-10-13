@@ -65,3 +65,19 @@ The command is also available after installing the package with `uv sync`:
 ```bash
 uv run python main.py config.yaml
 ```
+## Resume an interrupted run
+
+Each run writes to its own folder under `training.output_path` (for example
+`outputs/demo/demo_training-October-13-2026_02+35PM-0540aa5/`). To continue
+a run after a crash, reboot, or Ctrl+C (which saves a checkpoint), pass that
+folder with `--resume`:
+
+```bash
+uv run training-pipeline config.yaml --resume outputs/demo/<run folder>
+```
+
+The run continues from its newest checkpoint with its optimizer state and
+step/epoch counters, and keeps writing to the same folder. It uses the
+settings saved in the run's `config.json`, not the YAML file, so changing
+`epochs` in the YAML does not extend a resumed run, and `warm_start` is
+ignored. The epoch in progress when the checkpoint was saved is run again.

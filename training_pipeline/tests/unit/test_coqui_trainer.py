@@ -32,7 +32,8 @@ class TestCoquiTrainer(unittest.TestCase):
             training_config=training_cfg,
         )
 
-    def _train(self, config, *, defaults=None, warm_start_checkpoint=None):
+    def _train(self, config, *, defaults=None, warm_start_checkpoint=None,
+               resume_path=None):
         """Run CoquiTrainer.train with Coqui mocked out; return the mocks."""
         spec = CoquiModelSpec(
             config_cls=Mock(name="config_cls"),
@@ -60,6 +61,7 @@ class TestCoquiTrainer(unittest.TestCase):
             CoquiTrainer(mocks.logger).train(
                 config,
                 warm_start_checkpoint=warm_start_checkpoint,
+                resume_path=resume_path,
             )
         return mocks
 
@@ -149,6 +151,18 @@ class TestCoquiTrainer(unittest.TestCase):
 
         mocks.trainer_args.assert_called_once_with(restore_path="checkpoints/model.pth")
         mocks.make_trainer.assert_called_once()
+
+    def test_resume_continues_the_run_folder(self):
+        mocks = self._train(
+            self._config(),
+            warm_start_checkpoint="checkpoints/model.pth",
+            resume_path="runs/sss-run",
+        )
+
+        # resuming takes precedence; warm start would reset the optimizer/step
+        mocks.trainer_args.assert_called_once_with(continue_path="runs/sss-run")
+        mocks.make_trainer.return_value.fit.assert_called_once_with()
+        mocks.logger.info.assert_any_call("Resuming Coqui run in %s", "runs/sss-run")
 
     def test_unknown_model_type_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "fastspeech9.*Available types: tacotron2"):

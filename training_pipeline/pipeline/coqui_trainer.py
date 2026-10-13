@@ -78,8 +78,14 @@ class CoquiTrainer(BaseTrainer):
                 f"Invalid {location} for coqui {model_type}: {error}"
             ) from error
 
-    def train(self, config, *, warm_start_checkpoint: str | None = None):
-        """Train the Coqui model, optionally restoring a model checkpoint."""
+    def train(
+        self,
+        config,
+        *,
+        warm_start_checkpoint: str | None = None,
+        resume_path: str | None = None,
+    ):
+        """Train the Coqui model, optionally warm starting or resuming a run."""
         dataset_cfg = config.dataset_config
         model_cfg = config.model_config
         training_cfg = config.training_config
@@ -171,8 +177,16 @@ class CoquiTrainer(BaseTrainer):
 
         model = spec.model_cls(config, ap=ap, tokenizer=tokenizer)
 
+        if resume_path:
+            # Coqui reloads the run's own config.json and latest checkpoint
+            # (model, optimizer, step, epoch) and keeps writing to that folder.
+            self.logger.info("Resuming Coqui run in %s", resume_path)
+            trainer_args = TrainerArgs(continue_path=resume_path)
+        else:
+            trainer_args = TrainerArgs(restore_path=warm_start_checkpoint or "")
+
         trainer = CoquiTrainerClass(
-            TrainerArgs(restore_path=warm_start_checkpoint or ""),
+            trainer_args,
             config,
             training_cfg.output_path,
             model=model,

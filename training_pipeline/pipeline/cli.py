@@ -20,12 +20,21 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Path to the training configuration YAML file.",
     )
+    parser.add_argument(
+        "--resume",
+        type=Path,
+        metavar="RUN_DIR",
+        help="Continue an interrupted run from its output folder (the folder "
+        "with config.json and checkpoints). The run's saved settings are used "
+        "and warm_start is ignored.",
+    )
     return parser
 
 
 def run(
     config_path: str | Path,
     *,
+    resume_path: str | Path | None = None,
     trainer_factory: TrainerFactory | None = None,
     logger: logging.Logger | None = None,
 ) -> int:
@@ -48,6 +57,20 @@ def run(
             "warm_start.checkpoint_path must be provided when warm_start.enabled is true"
         )
 
+    if resume_path is not None:
+        resume_dir = Path(resume_path)
+        if not (resume_dir / "config.json").is_file():
+            raise ValueError(
+                f"Cannot resume from {resume_dir}: expected a training run folder "
+                "containing config.json"
+            )
+        if not any(resume_dir.glob("*.pth")):
+            raise ValueError(f"Cannot resume from {resume_dir}: no checkpoints found")
+        logger.info("Resuming training run %s (config %s)", resume_dir, config_file)
+        trainer.train(config_manager, resume_path=str(resume_dir))
+        logger.info("Training pipeline completed")
+        return 0
+
     logger.info(
         "Starting %s training from %s",
         "warm-start" if warm_start else "fresh",
@@ -61,7 +84,7 @@ def run(
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     try:
-        return run(args.config)
+        return run(args.config, resume_path=args.resume)
     except (OSError, RuntimeError, ValueError) as error:
         logging.getLogger("training_pipeline").error("Training failed: %s", error)
         return 1

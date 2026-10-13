@@ -5,7 +5,9 @@ from pathlib import Path
 
 import yaml
 
-from pipeline.cli import run
+from unittest.mock import patch
+
+from pipeline.cli import main, run
 from pipeline.trainer import Trainer
 
 
@@ -13,8 +15,8 @@ class RecordingTrainer(Trainer):
     def __init__(self):
         self.calls = []
 
-    def train(self, config, *, warm_start_checkpoint=None):
-        self.calls.append((config, warm_start_checkpoint))
+    def train(self, config, *, warm_start_checkpoint=None, resume_path=None):
+        self.calls.append((config, warm_start_checkpoint, resume_path))
 
 
 class TestCli(unittest.TestCase):
@@ -90,6 +92,61 @@ class TestCli(unittest.TestCase):
                     trainer_factory=lambda logger: RecordingTrainer(),
                     logger=logging.getLogger("test_cli_invalid"),
                 )
+
+    def test_run_resumes_from_run_folder(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = self._write_config(
+                directory,
+                {"enabled": True, "checkpoint_path": "checkpoints/model.pth"},
+            )
+            run_dir = Path(directory) / "run"
+            run_dir.mkdir()
+            (run_dir / "config.json").write_text("{}")
+            (run_dir / "checkpoint_2000.pth").write_bytes(b"")
+            trainer = RecordingTrainer()
+
+            result = run(
+                config_path,
+                resume_path=run_dir,
+                trainer_factory=lambda logger: trainer,
+                logger=logging.getLogger("test_cli_resume"),
+            )
+
+            self.assertEqual(result, 0)
+            self.assertEqual(trainer.calls[0][1:], (None, str(run_dir)))
+
+    def test_run_rejects_resume_folder_without_config(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = self._write_config(directory)
+
+            with self.assertRaisesRegex(ValueError, "containing config.json"):
+                run(
+                    config_path,
+                    resume_path=Path(directory) / "missing",
+                    trainer_factory=lambda logger: RecordingTrainer(),
+                    logger=logging.getLogger("test_cli_resume_missing"),
+                )
+
+    def test_run_rejects_resume_folder_without_checkpoints(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = self._write_config(directory)
+            run_dir = Path(directory) / "run"
+            run_dir.mkdir()
+            (run_dir / "config.json").write_text("{}")
+
+            with self.assertRaisesRegex(ValueError, "no checkpoints found"):
+                run(
+                    config_path,
+                    resume_path=run_dir,
+                    trainer_factory=lambda logger: RecordingTrainer(),
+                    logger=logging.getLogger("test_cli_resume_empty"),
+                )
+
+    def test_main_parses_resume_flag(self):
+        with patch("pipeline.cli.run", return_value=0) as fake_run:
+            self.assertEqual(main(["config.yaml", "--resume", "runs/sss"]), 0)
+
+        fake_run.assert_called_once_with(Path("config.yaml"), resume_path=Path("runs/sss"))
 
     def test_run_rejects_unknown_backend(self):
         with tempfile.TemporaryDirectory() as directory:
