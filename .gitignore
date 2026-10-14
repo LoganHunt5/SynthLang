@@ -4,4 +4,4 @@ __pycache__/
 training_pipeline/tmp/*
 *.mp3
 *.wav
-models/*
+web_app/models/
