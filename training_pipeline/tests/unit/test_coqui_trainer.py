@@ -1,8 +1,19 @@
+from pathlib import Path
+import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch, sentinel
 
-from pipeline.coqui_trainer import COQUI_MODELS, CoquiModelSpec, CoquiTrainer
+import numpy as np
+import soundfile
+import TTS.tts.datasets.dataset as coqui_dataset
+
+from pipeline.coqui_trainer import (
+    COQUI_MODELS,
+    CoquiModelSpec,
+    CoquiTrainer,
+    soundfile_audio_size,
+)
 
 
 class TestCoquiTrainer(unittest.TestCase):
@@ -163,6 +174,32 @@ class TestCoquiTrainer(unittest.TestCase):
         mocks.trainer_args.assert_called_once_with(continue_path="runs/sss-run")
         mocks.make_trainer.return_value.fit.assert_called_once_with()
         mocks.logger.info.assert_any_call("Resuming Coqui run in %s", "runs/sss-run")
+
+    def test_train_measures_audio_length_without_ffmpeg(self):
+        original = coqui_dataset.get_audio_size
+        self.addCleanup(setattr, coqui_dataset, "get_audio_size", original)
+
+        self._train(self._config())
+
+        self.assertIs(coqui_dataset.get_audio_size, soundfile_audio_size)
+
+    def test_soundfile_audio_size_reads_sample_count(self):
+        with tempfile.TemporaryDirectory() as directory:
+            wav = Path(directory) / "clip.wav"
+            soundfile.write(wav, np.zeros(22050 + 7), 22050)
+
+            self.assertEqual(soundfile_audio_size(wav), 22057)
+
+    def test_soundfile_audio_size_raises_runtime_error_for_unreadable_file(self):
+        # Coqui skips a clip only when its length check raises RuntimeError
+        with tempfile.TemporaryDirectory() as directory:
+            bad = Path(directory) / "clip.wav"
+            bad.write_text("not audio")
+
+            with self.assertRaisesRegex(RuntimeError, "Failed to read audio header"):
+                soundfile_audio_size(bad)
+            with self.assertRaises(RuntimeError):
+                soundfile_audio_size(Path(directory) / "missing.wav")
 
     def test_unknown_model_type_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "fastspeech9.*Available types: tacotron2"):

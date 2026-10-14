@@ -4,6 +4,8 @@ from pipeline.config_manager import ConfigManager
 import os
 from trainer import Trainer as CoquiTrainerClass, TrainerArgs
 
+import soundfile
+import TTS.tts.datasets.dataset as coqui_dataset
 from TTS.config.shared_configs import BaseAudioConfig
 from TTS.tts.configs.shared_configs import BaseDatasetConfig, CharactersConfig
 from TTS.tts.configs.tacotron2_config import Tacotron2Config
@@ -44,6 +46,21 @@ COQUI_MODELS: dict[str, CoquiModelSpec] = {
         },
     ),
 }
+
+
+def soundfile_audio_size(audiopath) -> int:
+    """Number of samples in an audio file, read from its header with soundfile.
+
+    Replaces Coqui's get_audio_size, which on torch >= 2.9 uses torchcodec and
+    needs a system FFmpeg install. Without FFmpeg (e.g. a fresh Windows
+    machine) every clip fails to decode and is silently skipped, leaving
+    nothing to train on. Training itself already loads audio with soundfile.
+    """
+    try:
+        return soundfile.info(str(audiopath)).frames
+    except (RuntimeError, OSError) as error:
+        # Coqui skips a clip when its length check raises RuntimeError
+        raise RuntimeError(f"Failed to read audio header of {audiopath}") from error
 
 
 def get_model_spec(model_type: str) -> CoquiModelSpec:
@@ -91,6 +108,7 @@ class CoquiTrainer(BaseTrainer):
         training_cfg = config.training_config
         spec = get_model_spec(model_cfg.type)
         self.logger.info("Preparing Coqui %s training", model_cfg.type)
+        coqui_dataset.get_audio_size = soundfile_audio_size
 
         # nested Coqui configs are given as mappings in model.params
         params = dict(model_cfg.params)

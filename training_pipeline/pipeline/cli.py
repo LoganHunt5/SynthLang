@@ -86,7 +86,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return run(args.config, resume_path=args.resume)
     except (OSError, RuntimeError, ValueError) as error:
-        logging.getLogger("training_pipeline").error("Training failed: %s", error)
+        # include the traceback: Coqui's cleanup after a failure can raise its
+        # own error (e.g. WinError 32 on Windows), and only the chained
+        # traceback shows the original cause
+        logging.getLogger("training_pipeline").error(
+            "Training failed: %s", error, exc_info=True
+        )
         return 1
 
 
