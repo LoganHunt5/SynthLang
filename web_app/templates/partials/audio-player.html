@@ -1,9 +1,10 @@
 <div>
     <p>Generated Audio:</p>
-    <audio controls autoplay>
-        <source src="{{ audio_url }}" type="audio/wav">
-        Your browser does not support the audio element.
-    </audio>
+    <audio controls autoplay src="{{ wav_url }}"></audio>
+    <div>
+        <a href="{{ wav_url }}" download="speech.wav">Download WAV</a>
+        <a href="{{ mp3_url }}" download="speech.mp3">Download MP3</a>
+    </div>
     <br>
     <small>File: {{ audio_url }}</small>
 </div>
