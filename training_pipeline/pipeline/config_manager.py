@@ -102,7 +102,7 @@ class ConfigManager:
     # Tyler, if I should make a more stricter access to these methods,
     # let me know.
     def _read_yaml(self, path: str):
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def _validate_config_dict(self, config_dict) -> list:
