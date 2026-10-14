@@ -1,6 +1,7 @@
 web_app/Data/*
 __pycache__/
-.venv
+*.venv
 training_pipeline/tmp/*
-.mp3
-.wav
+*.mp3
+*.wav
+models/*
