@@ -56,6 +56,23 @@ class TestCli(unittest.TestCase):
             self.assertEqual(len(trainer.calls), 1)
             self.assertIsNone(trainer.calls[0][1])
 
+    def test_run_ignores_checkpoint_when_warm_start_is_disabled(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = self._write_config(
+                directory,
+                {"enabled": False, "checkpoint_path": "checkpoints/model.pth"},
+            )
+            trainer = RecordingTrainer()
+
+            result = run(
+                config_path,
+                trainer_factory=lambda logger: trainer,
+                logger=logging.getLogger("test_cli_disabled"),
+            )
+
+            self.assertEqual(result, 0)
+            self.assertIsNone(trainer.calls[0][1])
+
     def test_run_passes_warm_start_checkpoint_to_trainer(self):
         with tempfile.TemporaryDirectory() as directory:
             config_path = self._write_config(

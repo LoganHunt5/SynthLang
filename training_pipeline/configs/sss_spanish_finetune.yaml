@@ -31,6 +31,9 @@ training:
   # More eval clips make best_model selection (eval postnet_loss, which rises
   # once the model overfits) more reliable.
   eval_split_max_size: 60
+  # Start from the English base model. Not from the first 1 hour run
+  # (tmp/sss-finetune-snapshot): its subset included the silent MixPre-002_ch1
+  # session, and at inference it fades into silence after the first sounds.
   warm_start:
     enabled: true
     checkpoint_path: tmp/ek1_tacotron2_weights.pth
@@ -118,7 +121,12 @@ model:
     # inference (see scripts/synthesize.py for the workaround).
     stopnet_pos_weight: 15.0
     grad_clip: 1.0
-    run_name: sss_spanish_finetune
+    # Guided attention loss (ek1 was trained with 5.0): penalizes attention
+    # that strays from the diagonal, so it keeps moving through the text.
+    # Without it, attention got stuck on one sound late in each sentence.
+    ga_alpha: 5.0
+    # New name for each experiment so its run folder is easy to tell apart.
+    run_name: sss_spanish_finetune_ga5_nosilence
     # Pick best_model by spectrogram quality. The default (total eval loss)
     # includes the noisy stop-token loss on a tiny eval set and kept
     # selecting the first epoch.

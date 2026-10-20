@@ -76,7 +76,9 @@ def run(
         "warm-start" if warm_start else "fresh",
         config_file,
     )
-    trainer.train(config_manager, warm_start_checkpoint=checkpoint or None)
+    trainer.train(
+        config_manager, warm_start_checkpoint=checkpoint if warm_start else None
+    )
     logger.info("Training pipeline completed")
     return 0
 

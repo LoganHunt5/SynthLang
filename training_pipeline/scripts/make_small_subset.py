@@ -15,6 +15,7 @@ import random
 import re
 from pathlib import Path
 
+import numpy as np
 import soundfile as sf
 
 
@@ -31,6 +32,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--minutes", type=float, default=15.0, help="Target audio duration.")
     parser.add_argument("--min-seconds", type=float, default=1.0)
     parser.add_argument("--max-seconds", type=float, default=10.0)
+    parser.add_argument("--min-peak", type=float, default=1e-3,
+                        help="Skip clips whose loudest sample is below this (silent "
+                        "recordings; one session of SSS_Output is all silence).")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args(argv)
 
@@ -39,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
     lines = args.metadata.read_text(encoding="utf-8").splitlines()
 
     candidates = []
-    skipped = {"text": 0, "duration": 0, "missing": 0}
+    skipped = {"text": 0, "duration": 0, "missing": 0, "silent": 0}
     for line in lines:
         if "|" not in line:
             continue
@@ -54,6 +58,10 @@ def main(argv: list[str] | None = None) -> int:
         duration = sf.info(str(audio_path)).duration
         if not args.min_seconds <= duration <= args.max_seconds:
             skipped["duration"] += 1
+            continue
+        # a transcript paired with silence teaches the model to output silence
+        if np.abs(sf.read(str(audio_path))[0]).max() < args.min_peak:
+            skipped["silent"] += 1
             continue
         candidates.append((audio, text, duration))
 
