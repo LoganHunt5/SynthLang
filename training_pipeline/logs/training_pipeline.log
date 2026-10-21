@@ -1,0 +1,4 @@
+2026-10-07 15:12:13,546 - training_pipeline - INFO - Starting fresh training from config.yaml
+2026-10-07 15:12:13,557 - training_pipeline - INFO - Preparing Coqui training
+2026-10-07 15:12:13,562 - training_pipeline - ERROR - Training failed: No phonemizer found for language en-us.
+                            You may need to install a third party library for this language.
