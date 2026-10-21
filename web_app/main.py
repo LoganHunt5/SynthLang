@@ -13,11 +13,10 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 from TTS.utils.synthesizer import Synthesizer
 
-MODELS_DIR = Path("models")
-AUDIO_DIR = Path("static/audio")
+BASE = Path(__file__).parent
+MODELS_DIR = BASE / "models"
+AUDIO_DIR = BASE / "static" / "audio"
 AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-
-
 
 def discover_models() -> dict[str, dict[str, dict]]:
     """Scan models/<language>/<model_name>/ for a checkpoint + config.json."""
@@ -90,10 +89,13 @@ class Generation(BaseModel):
     model: str = Field(min_length=1)
     prompt: str = Field(min_length=1, max_length=1000)
 
+#lifespan. Deletes audio files after an amount of time to avoid buildup.
 
+
+#app = FastAPI(lifespan=lifespan)
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=BASE / "static"), name="static")
+templates = Jinja2Templates(directory=BASE / "templates")
 
 
 @app.get("/")
@@ -116,9 +118,14 @@ async def handle_submit_form(
     language = generation.language.lower()
 
     # Validating against the registry also blocks path traversal tricks
+    # if generation.model not in MODEL_REGISTRY.get(language, {}):
+    #     raise HTTPException(status_code=400, detail="Unknown language/model")
     if generation.model not in MODEL_REGISTRY.get(language, {}):
-        raise HTTPException(status_code=400, detail="Unknown language/model")
-
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown language/model: {language!r} / {generation.model!r}. "
+                f"Registry: { {k: list(v) for k, v in MODEL_REGISTRY.items()} }",
+        )
     stem = uuid.uuid4().hex
     wav_path = AUDIO_DIR / f"{stem}.wav"
     mp3_path = AUDIO_DIR / f"{stem}.mp3"
