@@ -5,3 +5,4 @@ training_pipeline/tmp/*
 *.mp3
 *.wav
 web_app/models/
+cloudflared*.exe
