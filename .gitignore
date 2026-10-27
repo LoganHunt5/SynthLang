@@ -1,8 +1,13 @@
 web_app/Data/*
 __pycache__/
+<<<<<<< HEAD
 *.venv
 training_pipeline/tmp/*
 *.mp3
 *.wav
 web_app/models/
 cloudflared*.exe
+=======
+.venv
+training_pipeline/tmp/*
+>>>>>>> 5030b63 (Restore .gitignore)
