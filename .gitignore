@@ -10,3 +10,4 @@ web_app/models/
 cloudflared*.exe
 .venv
 training_pipeline/tmp/*
+cloudflared*.exe
