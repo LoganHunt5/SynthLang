@@ -6,3 +6,7 @@ training_pipeline/tmp/*
 *.wav
 web_app/models/*
 cloudflared*.exe
+web_app/models/
+cloudflared*.exe
+.venv
+training_pipeline/tmp/*
