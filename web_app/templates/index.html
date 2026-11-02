@@ -20,8 +20,9 @@
           <label>Language</label>
           <select name="language" hx-get="/language" hx-target="#model">
             <option value="select">Select a Language</option>
-            <option value="english">English</option>
-            <option value="spanish">Spanish</option>
+            {% for lang in languages %}
+              <option value="{{ lang }}">{{ lang|title }}</option>
+            {% endfor %}
           </select>
         </div>
 
