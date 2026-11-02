@@ -48,36 +48,38 @@ def discover_models() -> dict[str, dict[str, dict]]:
     return registry
 
 
-MODEL_REGISTRY = discover_models()
-
-_loaded: dict[tuple[str, str], Synthesizer] = {}
+# model_path -> (file mtime, Synthesizer)
+_loaded: dict[str, tuple[int, Synthesizer]] = {}
 _load_lock = threading.Lock()
 _tts_lock = threading.Lock()
 
 USE_CUDA = torch.cuda.is_available()
 
 
-def get_synthesizer(language: str, model: str) -> Synthesizer:
-    key = (language, model)
+def get_synthesizer(info: dict) -> Synthesizer:
+    path = info["model_path"]
+    mtime = Path(path).stat().st_mtime_ns
     with _load_lock:
-        if key not in _loaded:
-            info = MODEL_REGISTRY[language][model]
-            _loaded[key] = Synthesizer(
-                tts_checkpoint=info["model_path"],
+        cached = _loaded.get(path)
+        # Reload if the checkpoint was replaced on disk
+        if cached is None or cached[0] != mtime:
+            synth = Synthesizer(
+                tts_checkpoint=path,
                 tts_config_path=info["config_path"],
                 use_cuda=USE_CUDA,
             )
-        return _loaded[key]
+            _loaded[path] = (mtime, synth)
+            return synth
+        return cached[1]
 
 
-def synthesize(language: str, model: str, text: str, wav_path: Path, mp3_path: Path) -> None:
-    synth = get_synthesizer(language, model)
+def synthesize(info: dict, text: str, wav_path: Path, mp3_path: Path) -> None:
+    synth = get_synthesizer(info)
     with _tts_lock:
         wav = synth.tts(text)
         synth.save_wav(wav, str(wav_path))
         sample_rate = synth.output_sample_rate
 
-    # float audio -> 16-bit PCM -> MP3
     audio = np.clip(np.asarray(wav, dtype=np.float32), -1.0, 1.0)
     pcm = (audio * 32767).astype(np.int16)
 
@@ -131,14 +133,16 @@ templates = Jinja2Templates(directory=BASE / "templates")
 
 @app.get("/")
 async def serve_home(request: Request):
+    registry = await run_in_threadpool(discover_models)
     return templates.TemplateResponse(
-        request, "index.html", {"languages": sorted(MODEL_REGISTRY)}
+        request, "index.html", {"languages": sorted(registry)}
     )
 
 
 @app.get("/language")
 async def get_models(request: Request, language: str):
-    models = sorted(MODEL_REGISTRY.get(language.lower(), {}))
+    registry = await run_in_threadpool(discover_models)
+    models = sorted(registry.get(language.strip().lower(), {}))
     return templates.TemplateResponse(request, "partials/model.html", {"models": models})
 
 
@@ -146,24 +150,21 @@ async def get_models(request: Request, language: str):
 async def handle_submit_form(
     request: Request, generation: Annotated[Generation, Form()]
 ):
-    language = generation.language.lower()
+    language = generation.language.strip().lower()
 
-    # Validating against the registry also blocks path traversal tricks
-    # if generation.model not in MODEL_REGISTRY.get(language, {}):
-    #     raise HTTPException(status_code=400, detail="Unknown language/model")
-    if generation.model not in MODEL_REGISTRY.get(language, {}):
+    registry = await run_in_threadpool(discover_models)
+    info = registry.get(language, {}).get(generation.model)
+    if info is None:
         raise HTTPException(
             status_code=400,
-            detail=f"Unknown language/model: {language!r} / {generation.model!r}. "
-                f"Registry: { {k: list(v) for k, v in MODEL_REGISTRY.items()} }",
+            detail=f"Unknown language/model: {generation.language!r} / {generation.model!r}",
         )
+
     stem = uuid.uuid4().hex
     wav_path = AUDIO_DIR / f"{stem}.wav"
     mp3_path = AUDIO_DIR / f"{stem}.mp3"
 
-    await run_in_threadpool(
-        synthesize, language, generation.model, generation.prompt, wav_path, mp3_path
-    )
+    await run_in_threadpool(synthesize, info, generation.prompt, wav_path, mp3_path)
 
     return templates.TemplateResponse(
         request,
