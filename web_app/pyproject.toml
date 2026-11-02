@@ -3,7 +3,7 @@ name = "clientwebsite"
 version = "0.1.0"
 description = ""
 readme = "README.md"
-requires-python = "==3.10.20"
+requires-python = ">=3.10,<3.11"
 dependencies = [
     "fastapi[standard]>=0.135.1",
     "jinja2>=3.1.6",
