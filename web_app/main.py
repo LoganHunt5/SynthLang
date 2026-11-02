@@ -13,6 +13,10 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 from TTS.utils.synthesizer import Synthesizer
 
+import asyncio
+import time
+from contextlib import asynccontextmanager
+
 BASE = Path(__file__).parent
 MODELS_DIR = BASE / "models"
 AUDIO_DIR = BASE / "static" / "audio"
@@ -89,11 +93,38 @@ class Generation(BaseModel):
     model: str = Field(min_length=1)
     prompt: str = Field(min_length=1, max_length=1000)
 
-#lifespan. Deletes audio files after an amount of time to avoid buildup.
+AUDIO_TTL_SECONDS = 60
+SWEEP_INTERVAL_SECONDS = 15
+
+def delete_old_audio() -> None:
+    """Remove generated .wav/.mp3 files older than AUDIO_TTL_SECONDS (60)."""
+    cutoff = time.time() - AUDIO_TTL_SECONDS
+    for path in AUDIO_DIR.iterdir():
+        if path.suffix not in {".wav", ".mp3"}:
+            continue
+        try:
+            if path.stat().st_mtime < cutoff:
+                path.unlink()
+        except OSError:
+            # File was already removed or is still in use; try again next sweep
+            pass
 
 
-#app = FastAPI(lifespan=lifespan)
-app = FastAPI()
+async def cleanup_loop() -> None:
+    while True:
+        await run_in_threadpool(delete_old_audio)
+        await asyncio.sleep(SWEEP_INTERVAL_SECONDS)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    delete_old_audio()  # clear leftovers from previous runs
+    task = asyncio.create_task(cleanup_loop())
+    yield
+    task.cancel()
+
+
+app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=BASE / "static"), name="static")
 templates = Jinja2Templates(directory=BASE / "templates")
 
