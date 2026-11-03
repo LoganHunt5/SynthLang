@@ -11,3 +11,5 @@ cloudflared*.exe
 .venv
 training_pipeline/tmp/*
 cloudflared*.exe
+__pycache__/
+*.pyc
