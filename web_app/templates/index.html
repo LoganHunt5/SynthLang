@@ -1,42 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>FastAPI + HTMX</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f1218" media="(prefers-color-scheme: dark)">
+    <title>SynthLang</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <link rel="stylesheet" href="../static/css/index.css">
+    <link rel="stylesheet" href="/static/css/index.css">
   </head>
   <body>
-    {%include 'partials/header.html'%}
+    {% include 'partials/header.html' %}
     <div class="main-container">
-      
-        <div class="page-heading">
-          <h1>Text-to-Speech Generator</h1>
-          <p>Convert text into natural-sounding speech</p>
-        </div>
+
+      <div class="page-heading">
+        <h1>Text-to-Speech Generator</h1>
+        <p>Choose a language and model, then enter the text to synthesize</p>
+      </div>
 
       <form class="submit-form" hx-post="/generate" hx-target="#player-container">
-        <input type="text" name="prompt" placeholder="Input Text Here"></input>
+
+        <!-- Step 1: language -->
         <div>
-          <label>Language</label>
-          <select name="language" hx-get="/language" hx-target="#model">
-            <option value="select">Select a Language</option>
-            {% for lang in languages %}
-              <option value="{{ lang }}">{{ lang|title }}</option>
+          <label for="language">Language</label>
+          <select id="language" name="language" hx-get="/language" hx-target="#model">
+            <option value="">Select a language</option>
+            {% for language in languages %}
+            <option value="{{ language }}">{{ language|capitalize }}</option>
             {% endfor %}
           </select>
         </div>
 
+        <!-- Step 2: model (filled in by /language, disabled until a language is chosen) -->
         <div>
-          <label>Model</label>
-          <select id="model" name="model">
+          <label for="model">Model</label>
+          <select id="model" name="model" disabled>
             <option value="">Select a language first</option>
           </select>
         </div>
-        <button type="submit">Generate</button>
+
+        <!-- Step 3: text (disabled until a model is chosen) -->
+        <div>
+          <label for="prompt">Text</label>
+          <textarea id="prompt" name="prompt" rows="5" maxlength="1000" required disabled
+                    placeholder="Select a language and model first"></textarea>
+          <span class="char-count" id="char-count">0 / 1000</span>
+        </div>
+
+        <button type="submit" disabled>Generate</button>
       </form>
-      <div id="player-container">
-      </div>
+
+      <div id="error" class="error-message" role="alert"></div>
+      <div id="player-container" aria-live="polite"></div>
     </div>
-    {%include 'partials/footer.html'%}
+    {% include 'partials/footer.html' %}
+
+    <script>
+      const form = document.querySelector('.submit-form');
+      const language = form.elements.language;
+      const model = form.elements.model;
+      const prompt = form.elements.prompt;
+      const button = form.querySelector('button[type="submit"]');
+      const count = document.getElementById('char-count');
+      const errorBox = document.getElementById('error');
+
+      // Each step unlocks the next one
+      function syncForm() {
+        const hasLanguage = Boolean(language.value);
+        const ready = hasLanguage && Boolean(model.value);
+
+        model.disabled = !hasLanguage;
+        prompt.disabled = !ready;
+        button.disabled = !ready;
+
+        prompt.placeholder = ready
+          ? 'Enter text to synthesize…'
+          : hasLanguage
+            ? 'Select a model first'
+            : 'Select a language and model first';
+      }
+
+      language.addEventListener('change', () => {
+        model.selectedIndex = 0;   // drop the old model until the new list arrives
+        syncForm();
+      });
+      model.addEventListener('change', syncForm);
+
+      // New model list arrived from /language
+      document.body.addEventListener('htmx:afterSwap', (e) => {
+        if (e.target === model) syncForm();
+      });
+
+      prompt.addEventListener('input', () => {
+        count.textContent = `${prompt.value.length} / ${prompt.maxLength}`;
+      });
+
+      // htmx does not swap 4xx/5xx responses, so surface them here
+      document.body.addEventListener('htmx:beforeRequest', (e) => {
+        if (e.target === form) {
+          errorBox.textContent = '';
+          button.disabled = true;      // prevent double submits while generating
+        }
+      });
+      document.body.addEventListener('htmx:afterRequest', (e) => {
+        if (e.target === form) syncForm();
+      });
+      document.body.addEventListener('htmx:responseError', (e) => {
+        if (e.target === form) {
+          errorBox.textContent = "Couldn't generate audio. Check the selections and try again.";
+        }
+      });
+
+      // On a phone the result lands below the fold: bring it into view
+      document.body.addEventListener('htmx:afterSwap', (e) => {
+        if (e.target.id === 'player-container') {
+          e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+
+      syncForm();
+    </script>
   </body>
 </html>

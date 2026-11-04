@@ -1,6 +1,79 @@
-:root{
-  --bg-color: var(#fff);
-  --text-color: var(#000);
-  --main-font: 'Inter', sans-serif;
-  --header-color: rgba(0,0,0,1)
+:root {
+  /* Lets native controls (audio player, select popups, scrollbars) follow the theme */
+  color-scheme: light dark;
+
+  --main-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Surfaces */
+  --bg-color: #f6f7f9;
+  --surface: #ffffff;
+  --surface-muted: #f2f4f7;
+  --surface-hover: #e9ecf1;
+
+  /* Borders */
+  --border: #dfe3e8;
+  --border-strong: #c7cdd6;
+
+  /* Text */
+  --text-color: #1a1f29;
+  --text-muted: #667085;
+
+  /* Header */
+  --header-color: #1a1f29;
+  --header-bg: rgba(255, 255, 255, 0.85);
+
+  /* Accent */
+  --accent: #5b5fe0;
+  --accent-hover: #4a4ec9;
+  --accent-ring: rgba(91, 95, 224, 0.20);
+
+  /* Feedback */
+  --danger: #b42318;
+  --danger-bg: #fef3f2;
+  --danger-border: #fecdca;
+
+  /* Shape + depth */
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.05);
+
+  /* Page background glow */
+  --glow-1: rgba(91, 95, 224, 0.07);
+  --glow-2: rgba(0, 170, 220, 0.05);
+
+  /* Select chevron (stroke color is baked into the SVG) */
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #0f1218;
+    --surface: #171b23;
+    --surface-muted: #1e232d;
+    --surface-hover: #262c38;
+
+    --border: #2a303c;
+    --border-strong: #3a4252;
+
+    --text-color: #e7eaf0;
+    --text-muted: #98a2b3;
+
+    --header-color: #e7eaf0;
+    --header-bg: rgba(23, 27, 35, 0.85);
+
+    --accent: #7a7ef0;
+    --accent-hover: #8e92f5;
+    --accent-ring: rgba(122, 126, 240, 0.30);
+
+    --danger: #f97066;
+    --danger-bg: rgba(240, 68, 56, 0.10);
+    --danger-border: rgba(240, 68, 56, 0.35);
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25);
+
+    --glow-1: rgba(122, 126, 240, 0.10);
+    --glow-2: rgba(0, 170, 220, 0.06);
+
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2398a2b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
 }
