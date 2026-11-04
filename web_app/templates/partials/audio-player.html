@@ -1,10 +1,12 @@
-<div>
-    <p>Generated Audio:</p>
-    <audio controls autoplay src="{{ wav_url }}"></audio>
-    <div>
-        <a href="{{ wav_url }}" download="speech.wav">Download WAV</a>
-        <a href="{{ mp3_url }}" download="speech.mp3">Download MP3</a>
-    </div>
-    <br>
-    <small>File: {{ audio_url }}</small>
+<p class="result-title">Generated audio</p>
+<audio controls autoplay src="{{ wav_url }}"></audio>
+<div class="downloads">
+  <a href="{{ wav_url }}" download="speech.wav">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+    Download WAV
+  </a>
+  <a href="{{ mp3_url }}" download="speech.mp3">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+    Download MP3
+  </a>
 </div>

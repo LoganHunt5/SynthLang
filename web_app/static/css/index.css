@@ -17,27 +17,27 @@ body {
   min-height: 100%;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   min-height: 100vh;
+  min-height: 100dvh;   /* accounts for the mobile browser's collapsing address bar */
 
   display: flex;
   flex-direction: column;
 
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(100, 120, 255, 0.12),
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at bottom right,
-      rgba(0, 200, 255, 0.08),
-      transparent 35%
-    ),
+    radial-gradient(circle at top left, var(--glow-1), transparent 35%),
+    radial-gradient(circle at bottom right, var(--glow-2), transparent 35%),
     var(--bg-color);
 
   color: var(--text-color);
   font-family: var(--main-font);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 
   overflow-x: hidden;
 }
@@ -54,7 +54,7 @@ body {
   max-width: 1100px;
 
   margin: 0 auto;
-  padding: 60px 30px;
+  padding: 48px 30px;
 
   display: flex;
   flex-direction: column;
@@ -70,24 +70,30 @@ body {
   width: 100%;
   max-width: 850px;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .page-heading h1 {
-  margin: 0 0 10px 0;
-  font-size: 2.2rem;
+  margin: 0 0 8px 0;
+  font-size: 2rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-heading h1,
+.page-heading p {
+  text-wrap: balance;
 }
 
 .page-heading p {
   margin: 0;
   font-size: 1rem;
-  opacity: 0.65;
+  color: var(--text-muted);
 }
 
 
 /* =========================================
-   Form
+   Form Card
    ========================================= */
 
 .submit-form {
@@ -96,141 +102,285 @@ body {
 
   display: flex;
   flex-direction: column;
+  gap: 20px;
 
-  gap: 25px;
+  padding: 32px;
 
-  padding: 35px;
-
-  background: rgba(255, 255, 255, 0.04);
-
-  border: 1px solid rgba(255, 255, 255, 0.10);
-
-  border-radius: 18px;
-
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.20),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-
-  backdrop-filter: blur(12px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
 }
 
 
 /* =========================================
-   Text Input
-   ========================================= */
-
-.submit-form input[type="text"] {
-  width: 100%;
-
-  min-height: 140px;
-
-  padding: 18px;
-
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  border-radius: 12px;
-
-  background: rgba(0, 0, 0, 0.18);
-
-  color: var(--text-color);
-
-  font-family: inherit;
-  font-size: 1rem;
-
-  outline: none;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
-}
-
-.submit-form input[type="text"]::placeholder {
-  color: var(--text-color);
-  opacity: 0.45;
-}
-
-.submit-form input[type="text"]:focus {
-  border-color: rgba(100, 150, 255, 0.7);
-
-  background: rgba(0, 0, 0, 0.25);
-
-  box-shadow:
-    0 0 0 3px rgba(100, 150, 255, 0.12);
-}
-
-
-/* =========================================
-   Language + Model Controls
+   Field Groups + Labels
    ========================================= */
 
 .submit-form > div {
   display: flex;
   flex-direction: column;
-
-  gap: 8px;
-
+  gap: 6px;
   width: 100%;
 }
 
 .submit-form label {
-  font-size: 0.9rem;
-
+  font-size: 0.8125rem;
   font-weight: 600;
+  color: var(--text-muted);
+}
 
-  opacity: 0.8;
+/* Optional: character counter, placed under the text field */
+.char-count {
+  align-self: flex-end;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Optional: short description under a select (sample rate, checkpoint, etc.) */
+.field-hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 
 /* =========================================
-   Select Boxes
+   Text Input
+   Tip: use <textarea> in the HTML so text starts top-left.
+   An <input type="text"> always centers its text vertically.
+   ========================================= */
+
+.submit-form textarea,
+.submit-form input[type="text"] {
+  width: 100%;
+  min-height: 140px;
+
+  padding: 16px 18px;
+
+  background: var(--surface-muted);
+  color: var(--text-color);
+
+  border: none;
+  border-radius: 12px;
+
+  font-family: inherit;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+
+  resize: vertical;
+  outline: none;
+
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.submit-form textarea::placeholder,
+.submit-form input[type="text"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.submit-form textarea:hover,
+.submit-form input[type="text"]:hover {
+  background: var(--surface-hover);
+}
+
+.submit-form textarea:focus,
+.submit-form input[type="text"]:focus {
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--accent), 0 4px 14px var(--accent-ring);
+}
+
+.submit-form textarea:disabled,
+.submit-form input[type="text"]:disabled {
+  background: var(--surface-muted);
+  opacity: 0.55;
+  cursor: not-allowed;
+  resize: none;
+}
+
+
+/* =========================================
+   Select Boxes (borderless, filled)
+
+   Base styles work everywhere (the open list is the browser's native one).
+   Browsers with customizable selects (Chrome / Edge 135+) also get the
+   styled, animated dropdown in the @supports block below.
    ========================================= */
 
 .submit-form select {
   width: 100%;
+  height: 56px;
 
-  height: 50px;
+  padding: 0 48px 0 18px;
 
-  padding: 0 15px;
-
-  border-radius: 10px;
-
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  background-color: rgba(0, 0, 0, 0.20);
+  background-color: var(--surface-muted);
+  background-image: var(--chevron);
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 18px;
 
   color: var(--text-color);
 
+  border: none;
+  border-radius: 12px;
+
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 1.0625rem;
+  font-weight: 500;
+
+  -webkit-appearance: none;
+  appearance: none;
 
   cursor: pointer;
-
   outline: none;
 
   transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .submit-form select:hover {
-  background-color: rgba(0, 0, 0, 0.28);
-
-  border-color: rgba(255, 255, 255, 0.20);
+  background-color: var(--surface-hover);
 }
 
+.submit-form select:focus-visible,
 .submit-form select:focus {
-  border-color: rgba(100, 150, 255, 0.7);
+  background-color: var(--surface);
+  box-shadow: 0 0 0 2px var(--accent), 0 4px 14px var(--accent-ring);
+}
 
-  box-shadow:
-    0 0 0 3px rgba(100, 150, 255, 0.12);
+.submit-form select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: var(--surface-muted);
+  box-shadow: none;
 }
 
 .submit-form select option {
-  background: #202020;
+  background: var(--surface);
+  color: var(--text-color);
+}
 
-  color: white;
+.submit-form select option[value=""] {
+  color: var(--text-muted);
+}
+
+
+/* ---- Customizable select: styled button + animated popup ---- */
+
+@supports (appearance: base-select) {
+
+  .submit-form select,
+  .submit-form select::picker(select) {
+    appearance: base-select;
+  }
+
+  .submit-form select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 18px;
+    background-image: none;
+  }
+
+  /* Chevron that flips while the list is open */
+  .submit-form select::picker-icon {
+    content: "";
+    flex: none;
+    width: 18px;
+    height: 18px;
+    background: var(--chevron) center / contain no-repeat;
+    transition: rotate 0.25s ease;
+  }
+
+  .submit-form select:open::picker-icon {
+    rotate: 180deg;
+  }
+
+  /* The dropdown panel */
+  .submit-form select::picker(select) {
+    width: anchor-size(width);
+    max-height: 320px;
+    margin: 8px 0;
+    padding: 6px;
+
+    background: var(--surface);
+    border: none;
+    border-radius: 14px;
+
+    box-shadow:
+      0 12px 32px rgba(16, 24, 40, 0.16),
+      0 2px 6px rgba(16, 24, 40, 0.08);
+
+    /* Closed state; animates to the open state below */
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top center;
+
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      overlay 0.2s allow-discrete,
+      display 0.2s allow-discrete;
+  }
+
+  .submit-form select::picker(select):popover-open {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .submit-form select::picker(select):popover-open {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+  }
+
+  /* Items */
+  .submit-form select option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 12px 14px;
+
+    background: transparent;
+    color: var(--text-color);
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 1rem;
+    cursor: pointer;
+
+    transition: background-color 0.12s ease;
+  }
+
+  .submit-form select option:hover,
+  .submit-form select option:focus-visible {
+    background: var(--surface-muted);
+  }
+
+  .submit-form select option:checked {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .submit-form select option::checkmark {
+    order: 1;
+    margin-left: auto;
+    color: var(--accent);
+  }
+
+  .submit-form select option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 
@@ -238,138 +388,290 @@ body {
    Generate Button
    ========================================= */
 
+.submit-form button,
+.submit-form select {
+  touch-action: manipulation;
+}
+
 .submit-form button {
+  position: relative;
+
   width: 100%;
+  height: 48px;
 
-  height: 52px;
+  margin-top: 4px;
 
-  margin-top: 5px;
+  background: var(--accent);
+  color: #fff;
 
   border: none;
-
-  border-radius: 10px;
-
-  background: linear-gradient(
-    135deg,
-    #667eea,
-    #764ba2
-  );
-
-  color: white;
+  border-radius: var(--radius);
 
   font-family: inherit;
-
   font-size: 1rem;
-
   font-weight: 600;
 
   cursor: pointer;
 
-  box-shadow:
-    0 5px 15px rgba(102, 126, 234, 0.25);
-
   transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    filter 0.15s ease;
+    background-color 0.15s ease,
+    transform 0.05s ease;
 }
 
 .submit-form button:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 8px 20px rgba(102, 126, 234, 0.35);
-
-  filter: brightness(1.08);
+  background: var(--accent-hover);
 }
 
 .submit-form button:active {
-  transform: translateY(0);
+  transform: translateY(1px);
+}
 
-  box-shadow:
-    0 3px 8px rgba(102, 126, 234, 0.25);
+.submit-form button:focus-visible {
+  outline: 3px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+.submit-form button:disabled,
+.submit-form button[aria-busy="true"] {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading state: set aria-busy="true" and disabled while generating,
+   and change the label to "Generating…" in JS */
+.submit-form button[aria-busy="true"]::after,
+.submit-form.htmx-request button::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 10px;
+  vertical-align: -2px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 
 /* =========================================
-   Audio Player Container
+   Error Message
+   Use instead of alert(); e.g. <div class="error-message" role="alert">
+   ========================================= */
+
+.error-message {
+  width: 100%;
+  max-width: 850px;
+
+  margin-top: 20px;
+  padding: 12px 14px;
+
+  background: var(--danger-bg);
+  color: var(--danger);
+
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+
+  font-size: 0.9375rem;
+}
+
+.error-message:empty,
+.error-message[hidden] {
+  display: none;
+}
+
+
+/* =========================================
+   Results Card
    ========================================= */
 
 #player-container {
   width: 100%;
   max-width: 850px;
 
-  margin-top: 30px;
-
-  padding: 25px;
-
-  min-height: 80px;
+  margin-top: 24px;
+  padding: 24px;
 
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+/* Hide the card until there is something in it */
+#player-container:empty,
+#player-container[hidden] {
+  display: none;
+}
+
+#player-container audio {
+  width: 100%;
+}
+
+/* Download links styled as secondary buttons.
+   Wrap them in <div class="downloads"> to sit side by side. */
+#player-container a,
+.btn-secondary {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 10px;
 
-  border-radius: 16px;
+  min-height: 52px;
+  padding: 0 24px;
 
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--surface-muted);
+  color: var(--text-color);
 
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 12px;
 
-  box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.15);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+#player-container a:hover,
+.btn-secondary:hover {
+  background: var(--surface-hover);
+}
+
+#player-container a:active,
+.btn-secondary:active {
+  transform: translateY(1px);
+}
+
+#player-container a svg,
+.btn-secondary svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+#player-container a:focus-visible,
+.btn-secondary:focus-visible {
+  outline: 3px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+#player-container > a {
+  align-self: flex-start;
+}
+
+.downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.downloads a {
+  flex: 1 1 180px;
+}
+
+#player-container p {
+  margin: 0;
+}
+
+.result-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Filename, duration, model used, etc. */
+.result-meta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 
 /* =========================================
-   Generated Audio Player
+   Footer
    ========================================= */
 
-#player-container audio {
-  width: 100%;
-
-  max-width: 750px;
+.footer-container {
+  padding: 20px 30px;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 
 /* =========================================
    Responsive Design
+   Side padding is 16px everywhere so the header, card and
+   footer share the same left edge.
    ========================================= */
 
 @media (max-width: 700px) {
-
   .main-container {
-    padding: 40px 15px;
+    padding: 28px 16px 36px;
+  }
+
+  .page-heading {
+    margin-bottom: 22px;
+  }
+
+  .page-heading h1 {
+    font-size: 1.6rem;
+  }
+
+  .page-heading p {
+    font-size: 0.9375rem;
   }
 
   .submit-form {
-    padding: 25px 20px;
+    gap: 18px;
+    padding: 22px 18px;
+    border-radius: 16px;
   }
 
-  .main-container::before {
-    font-size: 1.7rem;
+  #player-container {
+    padding: 18px;
+    border-radius: 16px;
   }
 
+  .footer-container {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .page-heading h1 {
+    font-size: 1.45rem;
+  }
+
+  .submit-form {
+    padding: 20px 14px;
+  }
 }
 
 
 /* =========================================
-   Very Small Screens
+   Reduced Motion
    ========================================= */
 
-@media (max-width: 450px) {
-
-  .main-container {
-    padding: 30px 10px;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
-
-  .submit-form {
-    padding: 20px 15px;
-
-    border-radius: 14px;
-  }
-
-  .main-container::before {
-    font-size: 1.5rem;
-  }
-
 }

@@ -1,22 +1,22 @@
 FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 
-# TTS needs espeak-ng and libsndfile at runtime; build-essential covers any wheels that compile
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential espeak-ng libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Keep the venv OUTSIDE /app so bind-mounting your project doesn't hide it
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_LINK_MODE=copy \
     PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
-# Install dependencies only (cached until pyproject/uv.lock change)
+# 1. Install dependencies first (cached)
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-install-project
 
+# 2. ADD THIS LINE: Copy the rest of your app code into the image
+COPY . .
+
 EXPOSE 8000
 
-# 0.0.0.0 is required inside a container (your main.py's 127.0.0.1 would be unreachable)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
