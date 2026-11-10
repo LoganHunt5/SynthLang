@@ -12,3 +12,8 @@ dependencies = [
     "setuptools<70.0.0",
     "tts>=0.22.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
