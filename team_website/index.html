@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CS Capstone</title>
+  <title>SynthLang | NAU CS Capstone</title>
+  <link rel="icon" href="assets/images/logo_final.svg">
 
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.theme.min.css">
+  <link rel="stylesheet" href="css/glide.core.min.css">
+  <link rel="stylesheet" href="css/glide.theme.min.css">
 
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/styles.css">
@@ -26,6 +26,9 @@
       <div class="header-nav">
         <ul class="">
           <li class="nav-item"><a class="" href="#home">Home</a></li>
+          <li class="nav-item"><a class="" href="#requirements">Requirements</a></li>
+          <li class="nav-item"><a class="" href="#solution">Solution</a></li>
+          <li class="nav-item"><a class="" href="#technologies">Technologies</a></li>
           <li class="nav-item"><a class="" href="#videos">Videos</a></li>
           <li class="nav-item"><a class="" href="#about">About Us</a></li>
           <li class="nav-item"><a class="" href="#documents">Documents</a></li>
@@ -40,19 +43,24 @@
       <div class="glide__track" data-glide-el="track">
         <ul class="glide__slides">
           <li class="glide__slide">
-            <p class="slide-eyebrow">The Problem</p>
-            <h2>Everyone deserves a voice that is their own</h2>
+            <p class="slide-eyebrow">Project Description</p>
+            <h2>Everyone deserves a voice that feels like their own</h2>
             <hr>
             <p class="slide-lead">
-              For people who do not have the ability to speak, like the late Stephen Hawking,
-              Augmentative and Alternative Communication (AAC) technology is a lifeline
-              to the world.
+              Augmentative and Alternative Communication (AAC) devices give people with
+              speech impairments a way to speak, and text-to-speech (TTS) powers many of
+              them. People use an AAC voice more consistently when it feels like theirs.
             </p>
             <div class="callout">
-              <strong>The problem:</strong> English and other major languages have plenty of Text-to-Speech
-              (TTS) models. Under-resourced languages often have few, or none. Our
-              project helps change that.
+              <strong>The problem:</strong> Languages such as Diné Bizaad (Navajo) and Hopi
+              have few or no speech synthesizers. SynthLang builds the tools to change
+              that, including for people who may soon lose their natural voice.
             </div>
+            <p class="slide-link">
+              <a href="assets/documents/Tucker_Speech_Synthesis.docx" target="_blank">Download and read the original
+                project proposal
+                &rarr;</a>
+            </p>
           </li>
 
           <li class="glide__slide">
@@ -78,44 +86,23 @@
             <div class="compare">
               <div class="compare-card">
                 <h3>Where it stood</h3>
-                <p>
-                  Dr. Tucker's previous text to speech system relied on NVIDIA's Tacotron2 implementation, which
-                  has been unmaintained since 2020 and no longer functions.
-                </p>
+                <ul class="card-list">
+                  <li>A legacy Tacotron2 implementation that is no longer maintained and
+                    can't run reliably on modern hardware</li>
+                  <li>No single workflow for training, deploying and using models</li>
+                  <li>No user-friendly interface for generating speech</li>
+                </ul>
               </div>
               <div class="compare-card compare-card--accent">
                 <h3>What we're building</h3>
                 <p>
-                  A modern, maintainable replacement that keeps his research moving
-                  forward by allowing text to speech model creation and use.
+                  A modern, modular system that Dr. Tucker can maintain, so he can focus
+                  on his research instead of on fixing software.
                 </p>
               </div>
             </div>
           </li>
 
-          <li class="glide__slide">
-            <p class="slide-eyebrow">Our solution</p>
-            <h2>Two components</h2>
-            <hr>
-            <div class="step-grid">
-              <div class="step-card">
-                <span class="step-num">01</span>
-                <h3>Training pipeline</h3>
-                <p>
-                  A streamlined, modular framework for training TTS models without having to
-                  manage the system's underlying complexity.
-                </p>
-              </div>
-              <div class="step-card">
-                <span class="step-num">02</span>
-                <h3>Web application</h3>
-                <p>
-                  Hosts the trained models. Allows for speech generation without requiring any code or command-line
-                  interface.
-                </p>
-              </div>
-            </div>
-          </li>
         </ul>
       </div>
 
@@ -133,6 +120,245 @@
         </button>
       </div>
     </div>
+
+    <!-- ===== REQUIREMENTS ===== -->
+<div id="requirements" class="divider"></div>
+
+<header>
+  <div class="container">
+    <div class="my-4 ml-4">
+      <h1 class="display-4 outlined-text" style="font-weight:700">High-Level Requirements</h1>
+    </div>
+  </div>
+</header>
+
+<div class="container content-section">
+  <p class="section-lead">
+    Working with Dr. Tucker, we defined requirements for the two halves of the
+    system: a web application for generating speech, and a training pipeline
+    for creating new voice models. These were agreed as the project baseline in
+    our Requirements Specification.
+  </p>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="content-card">
+        <h3>Web application</h3>
+        <ul class="card-list">
+          <li>Accept text input and return generated audio</li>
+          <li>Let users choose between different voices and languages</li>
+          <li>Show live progress while audio is being generated</li>
+          <li>Store and serve pre-trained models uploaded by the sponsor</li>
+          <li>Work on both mobile and desktop</li>
+          <li>Be easy for NAU ITS to host and maintain</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="content-card">
+        <h3>Training pipeline</h3>
+        <ul class="card-list">
+          <li>Let Dr. Tucker create models without advanced software engineering skills</li>
+          <li>Support fine-tuning on small, noisy or incomplete datasets</li>
+          <li>Allow training to be configured without editing source code</li>
+          <li>Make training runs reproducible</li>
+          <li>Show progress, errors and outputs during training</li>
+          <li>Support multiple TTS frameworks, so none is a permanent dependency</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <h3 class="subsection-title">Key constraints</h3>
+  <div class="content-card">
+    <ul class="card-list">
+      <li><strong>No GPU hosting.</strong> University policy prevents using the
+        high-performance GPU cluster for always-online servers, and there is no
+        budget for cloud GPUs. Inference must run on a standard CPU server.</li>
+      <li><strong>Training happens offline.</strong> Models are trained on the
+        sponsor's NVIDIA Titan GPUs and then deployed for inference.</li>
+      <li><strong>Reproducible environments.</strong> Dependencies must be
+        pinned so the system keeps working as libraries change.</li>
+      <li><strong>Cross-platform.</strong> The system must run on both Linux and
+        Windows.</li>
+    </ul>
+  </div>
+
+
+</div>
+
+    <!-- ===== SOLUTION ===== -->
+    <div id="solution" class="divider"></div>
+
+    <header>
+      <div class="container">
+        <div class="my-4 ml-4">
+          <h1 class="display-4 outlined-text" style="font-weight:700">Envisioned Solution</h1>
+        </div>
+      </div>
+    </header>
+
+    <div class="container content-section">
+      <p class="section-lead">
+        SynthLang is a web-enabled text-to-speech (TTS) training and inference
+        system. Models are trained offline on the sponsor's GPUs, then deployed to a
+        server where anyone can use them from a browser. The two halves are kept
+        separate so the tool stays usable on ordinary CPU-only hosting.
+      </p>
+
+      <figure class="figure-wide">
+        <img src="assets/images/solution/architecture.png" alt="SynthLang system architecture diagram">
+        <figcaption>
+          System architecture. The browser talks to a FastAPI server, which runs
+          trained models through PyTorch. Models are produced offline in a
+          separate training environment.
+        </figcaption>
+      </figure>
+
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="content-card">
+            <img class="photo-slot" src="assets/images/solution/website.png" alt="SynthLang web application screenshot">
+            <h3>Web application</h3>
+            <ul class="card-list">
+              <li>Enter text, choose a voice or language, and start synthesis</li>
+              <li>Live progress feedback while audio is generated</li>
+              <li>Playback controls and downloadable audio (.wav)</li>
+              <li>Works on mobile and desktop</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6 mb-4">
+          <div class="content-card">
+            <img class="photo-slot" src="assets/images/solution/pipeline.png" alt="SynthLang training pipeline diagram">
+            <h3>Training pipeline</h3>
+            <ul class="card-list">
+              <li>Validates and preprocesses datasets of paired audio and text</li>
+              <li>Configurable training runs, including fine-tuning</li>
+              <li>Logging, progress monitoring and automatic checkpointing</li>
+              <li>Exports trained models for deployment</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="subsection-title">Screenshot walkthrough</h3>
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <figure class="figure-small">
+            <img class="photo-slot" src="assets/images/solution/walkthrough1.png" alt="SynthLang web walkthrough 1">
+            <figcaption>Step 1: Select a language and a model from the dropdown, enter text and click generate</figcaption>
+          </figure>
+        </div>
+        <div class="col-md-6 mb-4">
+          <figure class="figure-small">
+            <img class="photo-slot" src="assets/images/solution/walkthrough2.png" alt="SynthLang web walkthrough 2">
+            <figcaption>Step 2: Wait for the audio to be generated, then download or listen</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TECHNOLOGIES ===== -->
+    <div id="technologies" class="divider"></div>
+
+    <header>
+      <div class="container">
+        <div class="my-4 ml-4">
+          <h1 class="display-4 outlined-text" style="font-weight:700">Technologies</h1>
+        </div>
+      </div>
+    </header>
+
+    <div class="container content-section">
+      <div class="row">
+
+        <div class="col-md-6 mb-4">
+          <div class="tech-card">
+            <img class="photo-slot tech-logo" src="assets/images/logos/coquitts.png" alt="coqui tts logo">
+            <div>
+              <h3>Coqui TTS</h3>
+              <p>
+                The open-source toolkit at the core of our training pipeline. We
+                chose it because it is open access and supports fine-tuning on the
+                small, incomplete datasets typical of under-resourced languages.
+                Its main drawback is that it is no longer actively maintained, so
+                we isolate it behind a wrapper to keep it replaceable.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="tech-card">
+            <img class="photo-slot tech-logo" src="assets/images/logos/pytorch.png" alt="pytorch logo">
+            <div>
+              <h3>PyTorch</h3>
+              <p>
+                The deep learning framework for both training and inference, which
+                keeps model formats consistent between the two environments.
+                Training uses CUDA on the sponsor's NVIDIA Titan GPUs, which gave a
+                15&ndash;17x speedup over CPU in our feasibility tests. For
+                deployment, <code>torch.compile()</code> optimizes inference for
+                CPU-only servers.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="tech-card">
+            <img class="photo-slot tech-logo" src="assets/images/logos/fastapi.png" alt="fastapi logo">
+            <div>
+              <h3>FastAPI</h3>
+              <p>
+                The backend web server. It exposes the API endpoints, runs the
+                loaded model, and handles requests asynchronously, so a failed or
+                slow synthesis never freezes a user's browser session. We chose it
+                for its speed, its async support and its low overhead.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="tech-card">
+            <img class="photo-slot tech-logo" src="assets/images/logos/jinja2.png" alt="jinja2 logo">
+            <div>
+              <h3>HTMX and Jinja2</h3>
+              <p>
+                The frontend. Jinja2 templates deliver pages with HTMX attributes,
+                so there is no separate JavaScript build step to maintain. HTMX
+                polling reports synthesis progress instead of WebSockets, which
+                keeps the server simple and compatible with standard university
+                hosting.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="tech-card">
+            <img class="photo-slot tech-logo" src="assets/images/logos/uv.png" alt="uv logo">
+            <div>
+              <h3>uv</h3>
+              <p>
+                The Python package manager. A <code>uv.lock</code> file pins exact
+                dependency versions so the training and production environments
+                match. This directly addresses the sponsor's original problem: a
+                system that broke whenever its dependencies changed.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        
+
+      </div>
+    </div>
+
+
     <div id="videos" class="divider"></div>
 
     <header>
@@ -565,9 +791,9 @@
               <h5 class="fw-bold team-blue">Capstone Poster</h5>
               <p class="card-text text-muted small">Updated Nov 18, 2026</p>
               <div class="d-grid gap-2">
-                <a href="assets/documents/sem2/Synthlang_poster.pptx" target="_blank"
+                <a href="assets/documents/sem2/Synthlang_poster.pdf" target="_blank"
                   class="btn btn-outline-primary btn-sm">View Online</a>
-                <a href="assets/documents/sem2/Synthlang_poster.pptx" download class="btn btn-primary btn-sm">Download
+                <a href="assets/documents/sem2/Synthlang_poster.pdf" download class="btn btn-primary btn-sm">Download
                   PDF</a>
               </div>
             </div>
@@ -620,16 +846,16 @@
   </div>
 
   <div class="footer">
+    SynthLang · NAU Computer Science Capstone · Spring 2026
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/glide.min.js"></script>
+  <script src="js/glide.min.js"></script>
   <script>
     new Glide('.glide', {
       type: 'carousel',
       startAt: 0,
       perView: 1,
       gap: 20,
-      autoplay: 7000,
     }).mount();
     new Glide('#glide-timeline', {
       type: 'carousel',
